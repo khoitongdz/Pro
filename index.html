@@ -2,31 +2,47 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Điện Thoại Ảo</title>
+  <title>phone say gex</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="phone">
+
+  <!-- Màn hình khóa -->
   <div class="lockscreen" id="lockscreen">
     <div class="time" id="lockTime"></div>
     <div class="slide-text">Slide to unlock →</div>
   </div>
 
+  <!-- Màn hình chính -->
   <div class="screen" id="screen" style="display: none;">
     <div class="status-bar">
       <span id="status-time"></span>
       <span>📶 🔋</span>
     </div>
+
     <div class="apps" id="apps">
       <div class="app" onclick="openPlayStore()">
         <img src="https://cdn-icons-png.flaticon.com/512/888/888857.png" alt="Play Store">
         <span>Play Store</span>
       </div>
     </div>
+
+    <div class="app-view" id="app-view" style="display:none;">
+      <iframe id="app-frame" src=""></iframe>
+    </div>
+
+    <div class="nav-bar">
+      <div class="nav-btn" onclick="goHome()">🏠</div>
+      <div class="nav-btn" onclick="goBack()">↩️</div>
+      <div class="nav-btn">⏹️</div>
+    </div>
   </div>
+
 </div>
 
+<!-- Play Store -->
 <div class="store" id="store" style="display:none;">
   <h2>Google Play (Giả lập)</h2>
   <div class="store-list">
