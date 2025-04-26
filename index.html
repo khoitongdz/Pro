@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Điện Thoại Ảo</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="phone">
+  <div class="lockscreen" id="lockscreen">
+    <div class="time" id="lockTime"></div>
+    <div class="slide-text">Slide to unlock →</div>
+  </div>
+
+  <div class="screen" id="screen" style="display: none;">
+    <div class="status-bar">
+      <span id="status-time"></span>
+      <span>📶 🔋</span>
+    </div>
+    <div class="apps" id="apps">
+      <div class="app" onclick="openPlayStore()">
+        <img src="https://cdn-icons-png.flaticon.com/512/888/888857.png" alt="Play Store">
+        <span>Play Store</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="store" id="store" style="display:none;">
+  <h2>Google Play (Giả lập)</h2>
+  <div class="store-list">
+    <div class="store-app">
+      <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" alt="">
+      <div class="store-info">
+        <p>Youtube</p>
+        <button onclick="installApp('YouTube', 'https://www.youtube.com', 'https://cdn-icons-png.flaticon.com/512/1384/1384060.png')">Cài</button>
+      </div>
+    </div>
+
+    <div class="store-app">
+      <img src="https://cdn-icons-png.flaticon.com/512/3046/3046122.png" alt="">
+      <div class="store-info">
+        <p>TikTok</p>
+        <button onclick="installApp('TikTok', 'https://www.tiktok.com', 'https://cdn-icons-png.flaticon.com/512/3046/3046122.png')">Cài</button>
+      </div>
+    </div>
+
+    <div class="store-app">
+      <img src="https://cdn-icons-png.flaticon.com/512/1384/1384053.png" alt="">
+      <div class="store-info">
+        <p>Facebook</p>
+        <button onclick="installApp('Facebook', 'https://www.facebook.com', 'https://cdn-icons-png.flaticon.com/512/1384/1384053.png')">Cài</button>
+      </div>
+    </div>
+  </div>
+  <button class="close-btn" onclick="closePlayStore()">Quay lại</button>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
