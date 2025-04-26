@@ -1,17 +1,20 @@
 // Màn hình khóa
 const lockscreen = document.getElementById('lockscreen');
 const screen = document.getElementById('screen');
+const appView = document.getElementById('app-view');
+const appFrame = document.getElementById('app-frame');
 
 lockscreen.addEventListener('click', () => {
   lockscreen.style.display = 'none';
   screen.style.display = 'flex';
 });
 
-// Cập nhật thời gian
+// Cập nhật giờ
 function updateTime() {
   const now = new Date();
-  document.getElementById('lockTime').innerText = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-  document.getElementById('status-time').innerText = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+  const timeText = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+  document.getElementById('lockTime').innerText = timeText;
+  document.getElementById('status-time').innerText = timeText;
 }
 setInterval(updateTime, 1000);
 updateTime();
@@ -32,7 +35,7 @@ function installApp(name, url, icon) {
   const appDiv = document.createElement('div');
   appDiv.className = 'app';
   appDiv.onclick = function() {
-    window.open(url, '_blank');
+    openApp(url);
   };
 
   const img = document.createElement('img');
@@ -47,4 +50,20 @@ function installApp(name, url, icon) {
   appsDiv.appendChild(appDiv);
 
   alert(`Đã cài đặt ${name} thành công!`);
+}
+
+// Mở ứng dụng
+function openApp(url) {
+  appView.style.display = 'flex';
+  appFrame.src = url;
+}
+
+// Thanh điều hướng
+function goHome() {
+  appView.style.display = 'none';
+  appFrame.src = '';
+}
+
+function goBack() {
+  appFrame.contentWindow.history.back();
 }
