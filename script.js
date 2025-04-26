@@ -2,12 +2,9 @@
 const lockscreen = document.getElementById('lockscreen');
 const screen = document.getElementById('screen');
 const appView = document.getElementById('app-view');
-const appFrame = document.getElementById('app-frame');
-
-lockscreen.addEventListener('click', () => {
-  lockscreen.style.display = 'none';
-  screen.style.display = 'flex';
-});
+const appsDiv = document.getElementById('apps');
+const navBar = document.getElementById('nav-bar');
+const appWindows = [];
 
 // Cập nhật giờ
 function updateTime() {
@@ -19,51 +16,21 @@ function updateTime() {
 setInterval(updateTime, 1000);
 updateTime();
 
-// Play Store
+lockscreen.addEventListener('click', () => {
+  lockscreen.style.display = 'none';
+  screen.style.display = 'flex';
+});
+
+// Mở Play Store
 function openPlayStore() {
   document.getElementById('store').style.display = 'block';
 }
 
+// Đóng Play Store
 function closePlayStore() {
   document.getElementById('store').style.display = 'none';
 }
 
-// Cài ứng dụng
+// Cài đặt ứng dụng
 function installApp(name, url, icon) {
-  const appsDiv = document.getElementById('apps');
-
-  const appDiv = document.createElement('div');
-  appDiv.className = 'app';
-  appDiv.onclick = function() {
-    openApp(url);
-  };
-
-  const img = document.createElement('img');
-  img.src = icon;
-
-  const span = document.createElement('span');
-  span.innerText = name;
-
-  appDiv.appendChild(img);
-  appDiv.appendChild(span);
-
-  appsDiv.appendChild(appDiv);
-
-  alert(`Đã cài đặt ${name} thành công!`);
-}
-
-// Mở ứng dụng
-function openApp(url) {
-  appView.style.display = 'flex';
-  appFrame.src = url;
-}
-
-// Thanh điều hướng
-function goHome() {
-  appView.style.display = 'none';
-  appFrame.src = '';
-}
-
-function goBack() {
-  appFrame.contentWindow.history.back();
-}
+  // Thêm ứng dụng vào
