@@ -1,20 +1,20 @@
 body {
   margin: 0;
-  background: #111;
+  background: #000;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  font-family: 'Arial', sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 
 .phone {
-  width: 300px;
-  height: 600px;
-  background: #eee;
+  width: 320px;
+  height: 640px;
+  background: linear-gradient(to bottom right, #4facfe, #00f2fe);
   border-radius: 30px;
   overflow: hidden;
-  box-shadow: 0 0 30px rgba(0,0,0,0.8);
+  box-shadow: 0 0 30px rgba(0,0,0,0.7);
   position: relative;
 }
 
@@ -28,6 +28,7 @@ body {
   align-items: center;
   justify-content: center;
   font-size: 24px;
+  cursor: pointer;
 }
 
 .slide-text {
@@ -39,26 +40,31 @@ body {
 .screen {
   width: 100%;
   height: 100%;
-  background: #fff;
+  display: flex;
   flex-direction: column;
 }
 
 .status-bar {
   height: 40px;
-  background: #ccc;
+  background: rgba(255,255,255,0.3);
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 10px;
   font-size: 14px;
+  color: white;
 }
 
 .apps {
+  flex: 1;
+  background: white;
   display: flex;
   flex-wrap: wrap;
   padding: 20px;
   gap: 15px;
   justify-content: center;
+  align-content: flex-start;
+  overflow-y: auto;
 }
 
 .app {
@@ -78,13 +84,42 @@ body {
   margin-top: 5px;
 }
 
+.nav-bar {
+  height: 50px;
+  background: rgba(255,255,255,0.8);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.nav-btn {
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.app-view {
+  position: absolute;
+  top: 40px;
+  bottom: 50px;
+  left: 0;
+  right: 0;
+  background: white;
+  display: flex;
+}
+
+#app-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
 .store {
   position: absolute;
   top: 0;
   left: 0;
-  width: 300px;
-  height: 600px;
-  background: #fafafa;
+  width: 320px;
+  height: 640px;
+  background: white;
   overflow-y: auto;
   padding: 20px;
   box-sizing: border-box;
