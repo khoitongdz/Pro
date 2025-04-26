@@ -105,6 +105,19 @@ body {
   right: 0;
   background: white;
   display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  transition: transform 0.3s ease-in-out;
+}
+
+.app-window {
+  width: 150px;
+  height: 300px;
+  background-color: white;
+  border-radius: 15px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  position: relative;
 }
 
 #app-frame {
