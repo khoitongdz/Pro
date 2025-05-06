@@ -22,23 +22,7 @@
       z-index: -2;
       filter: brightness(0.5);
     }
-
-    .intro-box {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(12px);
-      padding: 40px;
-      border-radius: 20px;
-      color: white;
-      text-align: center;
-      box-shadow: 0 0 30px rgba(255,255,255,0.2);
-      max-width: 600px;
-      z-index: 1;
-    }
-
+    
     .intro-box img {
       width: 100px;
       height: 100px;
@@ -74,39 +58,6 @@
     .social-links a:hover {
       background-color: #00bcd4;
     }
-
-    .controls {
-      position: absolute;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 2;
-      background: rgba(0, 0, 0, 0.6);
-      padding: 15px;
-      border-radius: 12px;
-    }
-
-    .controls input {
-      margin: 5px 0;
-      width: 300px;
-      padding: 8px;
-      border-radius: 6px;
-      border: none;
-      outline: none;
-    }
-
-    .controls button {
-      margin-top: 10px;
-      padding: 6px 12px;
-      background: #00faff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    .controls button:hover {
-      background: #00bcd4;
-    }
   </style>
 </head>
 <body>
@@ -119,29 +70,13 @@
   <!-- Thông tin giới thiệu -->
   <div class="intro-box" id="profile">
     <img id="avatar" src="https://images-ext-1.discordapp.net/external/oY3IzCcrSLI8TfqjZf_TDPN5whbviE_PGqQqzJd2GYE/%3Fsize%3D4096/https/cdn.discordapp.com/avatars/1253726505402499203/6602147533b258ea90daf9b2c4a45176.png?format=webp&quality=lossless&width=476&height=476" alt="Avatar" />
-    <h1 id="name">Xin chào, tôi là [KhoitongDz]</h1>
+    <h1 id="name">Xin chào, tao là KhoitongDz</h1>
     <p id="desc">Chào mừng bạn đến với trang giới thiệu cá nhân của tôi.</p>
     <div class="social-links">
       <a id="ytlink" href="https://www.youtube.com/@khoitongDZ999" target="_blank">YouTube</a>
-      <a id="dslink" href="#" onclick="alert('https://discord.gg/2NpBPjM4PF"  target="_blank">Discord</a>
+      <a id="dslink" href="https://discord.gg/2NpBPjM4PF" target="_blank">Discord</a>
     </div>
   </div>
-
-  <script>
-    function updateInfo() {
-      const avatarUrl = document.getElementById('avatarUrl').value;
-      const youtubeUrl = document.getElementById('youtubeUrl').value;
-      const discordTag = document.getElementById('discordUrl').value;
-
-      if (avatarUrl) document.getElementById('avatar').src = avatarUrl;
-      if (youtubeUrl) document.getElementById('ytlink').href = youtubeUrl;
-      if (discordTag) {
-        document.getElementById('dslink').onclick = function () {
-          alert('Chép tag Discord: ' + discordTag);
-        };
-      }
-    }
-  </script>
 
 </body>
 </html>
