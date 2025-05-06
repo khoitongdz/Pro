@@ -11,6 +11,9 @@
       height: 100%;
       overflow: hidden;
       font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     #video-bg {
@@ -22,7 +25,17 @@
       z-index: -2;
       filter: brightness(0.5);
     }
-    
+
+    .intro-box {
+      text-align: center;
+      color: white;
+      z-index: 1;
+      padding: 20px;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+    }
+
     .intro-box img {
       width: 100px;
       height: 100px;
@@ -70,8 +83,9 @@
   <!-- Thông tin giới thiệu -->
   <div class="intro-box" id="profile">
     <img id="avatar" src="https://images-ext-1.discordapp.net/external/oY3IzCcrSLI8TfqjZf_TDPN5whbviE_PGqQqzJd2GYE/%3Fsize%3D4096/https/cdn.discordapp.com/avatars/1253726505402499203/6602147533b258ea90daf9b2c4a45176.png?format=webp&quality=lossless&width=476&height=476" alt="Avatar" />
-    <h1 id="name">Xin chào, tao là KhoitongDz</h1>
-    <p id="desc">Chào mừng bạn đến với trang giới thiệu cá nhân của tôi.</p>
+    <h1 id="name">Xin chào, tôi là KhoitongDz</h1>
+    <p id="desc">Dưới bầu trời sao, tình yêu em trao,
+Nhẹ nhàng như gió, vương vấn trong nhau.</p>
     <div class="social-links">
       <a id="ytlink" href="https://www.youtube.com/@khoitongDZ999" target="_blank">YouTube</a>
       <a id="dslink" href="https://discord.gg/2NpBPjM4PF" target="_blank">Discord</a>
