@@ -1,93 +1,155 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Nền Video Tùy Chỉnh</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Giới Thiệu Cá Nhân</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body, html {
+    html, body {
       height: 100%;
-      font-family: 'Segoe UI', sans-serif;
       overflow: hidden;
+      font-family: 'Segoe UI', sans-serif;
     }
 
-    #bg-video {
+    #video-bg {
       position: fixed;
-      top: 0;
-      left: 0;
-      min-width: 100vw;
-      min-height: 100vh;
-      z-index: -1;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
       object-fit: cover;
+      z-index: -2;
+      filter: brightness(0.5);
     }
 
-    .container {
-      position: relative;
-      z-index: 1;
-      text-align: center;
+    .intro-box {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
       padding: 40px;
-      background-color: rgba(0, 0, 0, 0.4);
-      color: white;
       border-radius: 20px;
-      backdrop-filter: blur(10px);
+      color: white;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(255,255,255,0.2);
       max-width: 600px;
-      margin: auto;
-      margin-top: 10vh;
+      z-index: 1;
     }
 
-    input[type="text"] {
-      width: 80%;
-      padding: 10px;
-      margin-top: 15px;
-      border-radius: 8px;
-      border: none;
+    .intro-box img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid white;
+      margin-bottom: 15px;
     }
 
-    button {
-      margin-top: 10px;
+    h1 {
+      font-size: 2em;
+      margin-bottom: 10px;
+      text-shadow: 0 0 15px #00faff;
+    }
+
+    p {
+      font-size: 1.1em;
+      margin-bottom: 20px;
+      opacity: 0.9;
+    }
+
+    .social-links a {
+      display: inline-block;
+      margin: 0 10px;
       padding: 10px 20px;
-      border: none;
-      border-radius: 10px;
-      background-color: #ffffffcc;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.3s ease;
+      border-radius: 8px;
+      background-color: #00faff;
+      color: black;
+      text-decoration: none;
+      transition: 0.3s;
     }
 
-    button:hover {
-      background: white;
-      color: black;
+    .social-links a:hover {
+      background-color: #00bcd4;
+    }
+
+    .controls {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 15px;
+      border-radius: 12px;
+    }
+
+    .controls input {
+      margin: 5px 0;
+      width: 300px;
+      padding: 8px;
+      border-radius: 6px;
+      border: none;
+      outline: none;
+    }
+
+    .controls button {
+      margin-top: 10px;
+      padding: 6px 12px;
+      background: #00faff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .controls button:hover {
+      background: #00bcd4;
     }
   </style>
 </head>
 <body>
 
-  <!-- Default video -->
-  <video id="bg-video" autoplay muted loop>
-    <source src="https://cdn.pixabay.com/vimeo/719088378/flowers-112430.mp4?width=1280&hash=9aeb8f39b3cf95b9fc5a94dd0f39579e5b2e8f4c" type="video/mp4">
-    Trình duyệt của bạn không hỗ trợ video nền.
+  <!-- Nền video -->
+  <video id="video-bg" autoplay muted loop playsinline>
+    <source src="https://cdn.discordapp.com/attachments/1363490003933728768/1369215657148944405/Blue_Archive_Wakamo_Live2D_1080p.mp4?ex=681b0cf3&is=6819bb73&hm=f47ad8c8579f6bb9e9c4e66be1097767e972929b9abfaa9b3de7833ff3df1ffc&" type="video/mp4">
   </video>
 
-  <div class="container">
-    <h1>🎬 Video làm nền</h1>
-    <p>Nhập link video (MP4) để thay nền:</p>
-    <input type="text" id="videoLink" placeholder="Dán link video .mp4 vào đây">
-    <br>
-    <button onclick="changeVideo()">Đổi Video</button>
+  <!-- Điều khiển -->
+  <div class="controls">
+    <input type="text" id="avatarUrl" placeholder="https://images-ext-1.discordapp.net/external/oY3IzCcrSLI8TfqjZf_TDPN5whbviE_PGqQqzJd2GYE/%3Fsize%3D4096/https/cdn.discordapp.com/avatars/1253726505402499203/6602147533b258ea90daf9b2c4a45176.png?format=webp&quality=lossless&width=476&height=476"><br>
+    <input type="text" id="youtubeUrl" placeholder="https://www.youtube.com/@khoitongDZ999"><br>
+    <input type="text" id="discordTag" placeholder="https://discord.gg/2NpBPjM4PF"><br>
+    <button onclick="updateInfo()">Cập nhật thông tin</button>
+  </div>
+
+  <!-- Thông tin giới thiệu -->
+  <div class="intro-box" id="profile">
+    <img id="avatar" src="https://images-ext-1.discordapp.net/external/oY3IzCcrSLI8TfqjZf_TDPN5whbviE_PGqQqzJd2GYE/%3Fsize%3D4096/https/cdn.discordapp.com/avatars/1253726505402499203/6602147533b258ea90daf9b2c4a45176.png?format=webp&quality=lossless&width=476&height=476" alt="Avatar" />
+    <h1 id="name">Xin chào, tôi là [KhoitongDz]</h1>
+    <p id="desc">Chào mừng bạn đến với trang giới thiệu cá nhân của tôi.</p>
+    <div class="social-links">
+      <a id="ytlink" href="https://www.youtube.com/@khoitongDZ999" target="_blank">YouTube</a>
+      <a id="dslink" href="#" onclick="alert('https://discord.gg/2NpBPjM4PF' + document.getElementById('discordTag').value)">Discord</a>
+    </div>
   </div>
 
   <script>
-    function changeVideo() {
-      const link = document.getElementById("videoLink").value;
-      const video = document.getElementById("bg-video");
-      if (link.trim() !== "") {
-        video.src = link.trim();
-        video.load();
-        video.play();
+    function updateInfo() {
+      const avatarUrl = document.getElementById('avatarUrl').value;
+      const youtubeUrl = document.getElementById('youtubeUrl').value;
+      const discordTag = document.getElementById('discordTag').value;
+
+      if (avatarUrl) document.getElementById('avatar').src = avatarUrl;
+      if (youtubeUrl) document.getElementById('ytlink').href = youtubeUrl;
+      if (discordTag) {
+        document.getElementById('dslink').onclick = function () {
+          alert('Chép tag Discord: ' + discordTag);
+        };
       }
     }
   </script>
+
 </body>
 </html>
