@@ -3,85 +3,89 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Nền Tùy Chỉnh</title>
+  <title>Nền Video Tùy Chỉnh</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body, html {
+      height: 100%;
+      font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
     }
 
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      height: 100vh;
-      background: url('https://cdn.discordapp.com/attachments/1363490003933728768/1369215657148944405/Blue_Archive_Wakamo_Live2D_1080p.mp4?ex=681b0cf3&is=6819bb73&hm=f47ad8c8579f6bb9e9c4e66be1097767e972929b9abfaa9b3de7833ff3df1ffc&') center/cover no-repeat fixed;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      transition: background-image 0.5s ease;
+    #bg-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      min-width: 100vw;
+      min-height: 100vh;
+      z-index: -1;
+      object-fit: cover;
     }
 
     .container {
+      position: relative;
+      z-index: 1;
       text-align: center;
-      background: rgba(0, 0, 0, 0.4);
       padding: 40px;
+      background-color: rgba(0, 0, 0, 0.4);
+      color: white;
       border-radius: 20px;
       backdrop-filter: blur(10px);
-      box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
-    }
-
-    h1 {
-      font-size: 2.5em;
-      margin-bottom: 20px;
-      text-shadow: 0 0 10px #000;
+      max-width: 600px;
+      margin: auto;
+      margin-top: 10vh;
     }
 
     input[type="text"] {
+      width: 80%;
       padding: 10px;
-      width: 70%;
+      margin-top: 15px;
+      border-radius: 8px;
       border: none;
-      border-radius: 10px;
-      margin-top: 20px;
-      font-size: 1em;
     }
 
     button {
-      margin-top: 15px;
+      margin-top: 10px;
       padding: 10px 20px;
       border: none;
       border-radius: 10px;
-      background-color: #ffffffaa;
+      background-color: #ffffffcc;
       font-weight: bold;
       cursor: pointer;
       transition: 0.3s ease;
     }
 
     button:hover {
-      background-color: #fff;
-      color: #000;
-    }
-
-    p {
-      font-size: 1em;
-      margin-top: 20px;
+      background: white;
+      color: black;
     }
   </style>
 </head>
 <body>
+
+  <!-- Default video -->
+  <video id="bg-video" autoplay muted loop>
+    <source src="https://cdn.pixabay.com/vimeo/719088378/flowers-112430.mp4?width=1280&hash=9aeb8f39b3cf95b9fc5a94dd0f39579e5b2e8f4c" type="video/mp4">
+    Trình duyệt của bạn không hỗ trợ video nền.
+  </video>
+
   <div class="container">
-    <h1>🖼 Thay Nền Web</h1>
-    <p>Nhập link ảnh để thay đổi nền:</p>
-    <input type="text" id="bgInput" placeholder="Dán link ảnh nền ở đây...">
+    <h1>🎬 Video làm nền</h1>
+    <p>Nhập link video (MP4) để thay nền:</p>
+    <input type="text" id="videoLink" placeholder="Dán link video .mp4 vào đây">
     <br>
-    <button onclick="changeBackground()">Đổi nền</button>
+    <button onclick="changeVideo()">Đổi Video</button>
   </div>
 
   <script>
-    function changeBackground() {
-      const link = document.getElementById('bgInput').value;
+    function changeVideo() {
+      const link = document.getElementById("videoLink").value;
+      const video = document.getElementById("bg-video");
       if (link.trim() !== "") {
-        document.body.style.backgroundImage = `url('${link}')`;
+        video.src = link.trim();
+        video.load();
+        video.play();
       }
     }
   </script>
