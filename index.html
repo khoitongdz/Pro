@@ -123,7 +123,7 @@
     <p id="desc">Chào mừng bạn đến với trang giới thiệu cá nhân của tôi.</p>
     <div class="social-links">
       <a id="ytlink" href="https://www.youtube.com/@khoitongDZ999" target="_blank">YouTube</a>
-      <a id="dslink" href="#" onclick="alert('https://discord.gg/2NpBPjM4PF' + document.getElementById('discordTag').value)">Discord</a>
+      <a id="dslink" href="#" onclick="alert('https://discord.gg/2NpBPjM4PF"  target="_blank">Discord</a>
     </div>
   </div>
 
@@ -131,7 +131,7 @@
     function updateInfo() {
       const avatarUrl = document.getElementById('avatarUrl').value;
       const youtubeUrl = document.getElementById('youtubeUrl').value;
-      const discordTag = document.getElementById('discordTag').value;
+      const discordTag = document.getElementById('discordUrl').value;
 
       if (avatarUrl) document.getElementById('avatar').src = avatarUrl;
       if (youtubeUrl) document.getElementById('ytlink').href = youtubeUrl;
