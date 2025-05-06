@@ -2,77 +2,88 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Điện Thoại Ảo Siêu Cấp</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nền Tùy Chỉnh</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      height: 100vh;
+      background: url('https://cdn.discordapp.com/attachments/1363490003933728768/1369215657148944405/Blue_Archive_Wakamo_Live2D_1080p.mp4?ex=681b0cf3&is=6819bb73&hm=f47ad8c8579f6bb9e9c4e66be1097767e972929b9abfaa9b3de7833ff3df1ffc&') center/cover no-repeat fixed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      transition: background-image 0.5s ease;
+    }
+
+    .container {
+      text-align: center;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 40px;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+    }
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px #000;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      width: 70%;
+      border: none;
+      border-radius: 10px;
+      margin-top: 20px;
+      font-size: 1em;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      background-color: #ffffffaa;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #fff;
+      color: #000;
+    }
+
+    p {
+      font-size: 1em;
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
-
-<div class="phone">
-
-  <!-- Màn hình khóa -->
-  <div class="lockscreen" id="lockscreen">
-    <div class="time" id="lockTime"></div>
-    <div class="slide-text">Slide to unlock →</div>
+  <div class="container">
+    <h1>🖼 Thay Nền Web</h1>
+    <p>Nhập link ảnh để thay đổi nền:</p>
+    <input type="text" id="bgInput" placeholder="Dán link ảnh nền ở đây...">
+    <br>
+    <button onclick="changeBackground()">Đổi nền</button>
   </div>
 
-  <!-- Màn hình chính -->
-  <div class="screen" id="screen" style="display: none;">
-    <div class="status-bar">
-      <span id="status-time"></span>
-      <span>📶 🔋</span>
-    </div>
-
-    <div class="apps" id="apps">
-      <div class="app" onclick="openPlayStore()">
-        <img src="https://cdn-icons-png.flaticon.com/512/888/888857.png" alt="Play Store">
-        <span>Play Store</span>
-      </div>
-    </div>
-
-    <div class="app-view" id="app-view" style="display:none;">
-      <iframe id="app-frame" src=""></iframe>
-    </div>
-
-    <div class="nav-bar">
-      <div class="nav-btn" onclick="goHome()">🏠</div>
-      <div class="nav-btn" onclick="goBack()">↩️</div>
-      <div class="nav-btn" onclick="showAppList()">📱</div>
-    </div>
-  </div>
-
-</div>
-
-<!-- Play Store -->
-<div class="store" id="store" style="display:none;">
-  <h2>Google Play (Giả lập)</h2>
-  <div class="store-list">
-    <div class="store-app">
-      <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" alt="">
-      <div class="store-info">
-        <p>Youtube</p>
-        <button onclick="installApp('YouTube', 'https://www.youtube.com', 'https://cdn-icons-png.flaticon.com/512/1384/1384060.png')">Cài</button>
-      </div>
-    </div>
-
-    <div class="store-app">
-      <img src="https://cdn-icons-png.flaticon.com/512/3046/3046122.png" alt="">
-      <div class="store-info">
-        <p>TikTok</p>
-        <button onclick="installApp('TikTok', 'https://www.tiktok.com', 'https://cdn-icons-png.flaticon.com/512/3046/3046122.png')">Cài</button>
-      </div>
-    </div>
-
-    <div class="store-app">
-      <img src="https://cdn-icons-png.flaticon.com/512/1384/1384053.png" alt="">
-      <div class="store-info">
-        <p>Facebook</p>
-        <button onclick="installApp('Facebook', 'https://www.facebook.com', 'https://cdn-icons-png.flaticon.com/512/1384/1384053.png')">Cài</button>
-      </div>
-    </div>
-  </div>
-  <button class="close-btn" onclick="closePlayStore()">Quay lại</button>
-</div>
-
-<script src="script.js"></script>
+  <script>
+    function changeBackground() {
+      const link = document.getElementById('bgInput').value;
+      if (link.trim() !== "") {
+        document.body.style.backgroundImage = `url('${link}')`;
+      }
+    }
+  </script>
 </body>
 </html>
