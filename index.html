@@ -1,98 +1,297 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Profile</title
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <link rel="icon" href="https://images-ext-1.discordapp.net/external/oY3IzCcrSLI8TfqjZf_TDPN5whbviE_PGqQqzJd2GYE/%3Fsize%3D4096/https/cdn.discordapp.com/avatars/1253726505402499203/6602147533b258ea90daf9b2c4a45176.png?format=webp&quality=lossless&width=476&height=476" type="image/png">                         
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    html, body {
-      height: 100%;
-      overflow: hidden;
-      font-family: 'Segoe UI', sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    #video-bg {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      object-fit: cover;
-      z-index: -2;
-      filter: brightness(0.5);
-    }
-
-    .intro-box {
-      text-align: center;
-      color: white;
-      z-index: 1;
-      padding: 20px;
-      background-color: rgba(0, 0, 0, 0.5);
-      border-radius: 10px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
-    }
-
-    .intro-box img {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid white;
-      margin-bottom: 15px;
-    }
-
-    h1 {
-      font-size: 2em;
-      margin-bottom: 10px;
-      text-shadow: 0 0 15px #00faff;
-    }
-
-    p {
-      font-size: 1.1em;
-      margin-bottom: 20px;
-      opacity: 0.9;
-    }
-
-    .social-links a {
-      display: inline-block;
-      margin: 0 10px;
-      padding: 10px 20px;
-      border-radius: 8px;
-      background-color: #00faff;
-      color: black;
-      text-decoration: none;
-      transition: 0.3s;
-    }
-
-    .social-links a:hover {
-      background-color: #00bcd4;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gửi Tin Nhắn Discord Webhook</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .toast {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .markdown-preview {
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .history-item {
+            transition: background-color 0.2s ease;
+        }
+        .history-item:hover {
+            background-color: #f1f5f9;
+        }
+        .dark .history-item:hover {
+            background-color: #374151;
+        }
+    </style>
 </head>
-<body>
+<body class="bg-gradient-to-br from-gray-100 to-gray-300 dark:from-gray-800 dark:to-gray-900 min-h-screen flex items-center justify-center p-4 transition-colors duration-300">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 w-full max-w-lg transition-colors duration-300">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Gửi Tin Nhắn Discord</h2>
+            <div class="flex items-center space-x-4">
+                <span id="currentTime" class="text-sm text-gray-600 dark:text-gray-300"></span>
+                <button id="themeToggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600">
+                    <svg id="sunIcon" class="h-5 w-5 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <svg id="moonIcon" class="h-5 w-5 block dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
 
-  <!-- Nền video -->
-  <video id="video-bg" autoplay muted loop playsinline>
-    <source src="https://cdn.discordapp.com/attachments/1363490003933728768/1369215657148944405/Blue_Archive_Wakamo_Live2D_1080p.mp4?ex=681b0cf3&is=6819bb73&hm=f47ad8c8579f6bb9e9c4e66be1097767e972929b9abfaa9b3de7833ff3df1ffc&" type="video/mp4">
-  </video>
+        <!-- Webhook URL Input -->
+        <div class="mb-4">
+            <label for="webhookUrl" class="block text-sm font-medium text-gray-700 dark:text-gray-300">URL Webhook Discord</label>
+            <input type="text" id="webhookUrl" class="mt-1 p-3 w-full border rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" placeholder="https://discord.com/api/webhooks/...">
+        </div>
 
-  <!-- Thông tin giới thiệu -->
-  <div class="intro-box" id="profile">
-    <img id="avatar" src="https://images-ext-1.discordapp.net/external/oY3IzCcrSLI8TfqjZf_TDPN5whbviE_PGqQqzJd2GYE/%3Fsize%3D4096/https/cdn.discordapp.com/avatars/1253726505402499203/6602147533b258ea90daf9b2c4a45176.png?format=webp&quality=lossless&width=476&height=476" alt="Avatar" />
-    <h1 id="name">Khoi</h1>
-    <p id="desc">Dưới bầu trời sao, tình yêu em trao,
-Nhẹ nhàng như gió, vương vấn trong nhau.</p>
-    <div class="social-links">
-      <a id="ytlink" href="https://www.youtube.com/@khoitongDZ999" target="_blank">YouTube</a>
-      <a id="dslink" href="https://discord.gg/2NpBPjM4PF" target="_blank">Discord</a>
+        <!-- Username Input -->
+        <div class="mb-4">
+            <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tên Người Gửi</label>
+            <input type="text" id="username" class="mt-1 p-3 w-full border rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" placeholder="Tên của bạn (tùy chọn)">
+        </div>
+
+        <!-- Avatar URL Input -->
+        <div class="mb-4">
+            <label for="avatarUrl" class="block text-sm font-medium text-gray-700 dark:text-gray-300">URL Avatar</label>
+            <input type="text" id="avatarUrl" class="mt-1 p-3 w-full border rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" placeholder="URL ảnh avatar (tùy chọn)">
+        </div>
+
+        <!-- Message Input -->
+        <div class="mb-4">
+            <label for="message" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tin Nhắn (Hỗ trợ Markdown)</label>
+            <textarea id="message" class="mt-1 p-3 w-full border rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" rows="4" placeholder="Nhập tin nhắn (VD: **bôi đậm**, *nghiêng*, `code`)"></textarea>
+        </div>
+
+        <!-- Message Preview -->
+        <div class="mb-4 hidden" id="previewContainer">
+            <label class="block text-sm stun font-medium text-gray-700 dark:text-gray-300">Xem trước</label>
+            <div id="preview" class="mt-1 p-3 w-full border rounded-lg bg-gray-50 dark:bg-gray-700 markdown-preview text-gray-800 dark:text-gray-200"></div>
+        </div>
+
+        <!-- Send and Clear History Buttons -->
+        <div class="flex space-x-2">
+            <button id="sendButton" onclick="sendMessage()" class="flex-1 bg-indigo-600 text-white p-3 rounded-lg hover:bg-indigo-700 disabled:bg-indigo-300 flex items-center justify-center transition-colors duration-200">
+                <span id="sendText">Gửi</span>
+                <svg id="loadingIcon" class="hidden h-5 w-5 animate-spin ml-2" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8h8a8 8 0 01-16 0z"></path>
+                </svg>
+            </button>
+            <button onclick="clearHistory()" class="bg-red-600 text-white p-3 rounded-lg hover:bg-red-700 transition-colors duration-200">Xóa Lịch Sử</button>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div id="toast" class="fixed bottom-4 right-4 p-4 rounded-lg shadow-lg text-white max-w-xs"></div>
+
+        <!-- Message History -->
+        <div class="mt-6">
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Lịch Sử Tin Nhắn</h3>
+            <ul id="history" class="mt-2 max-h-48 overflow-y-auto border rounded-lg p-3 bg-gray-50 dark:bg-gray-700"></ul>
+        </div>
     </div>
-  </div>
 
+    <script src="https://unpkg.com/remarkable@2.0.1/dist/remarkable.min.js"></script>
+    <script>
+        // Check if Remarkable is loaded
+        if (typeof Remarkable === 'undefined') {
+            console.error('Thư viện Remarkable không tải được. Xem trước Markdown sẽ không hoạt động.');
+            document.getElementById('previewContainer').innerHTML = '<p class="text-red-600">Lỗi: Không thể tải thư viện Markdown. Vui lòng kiểm tra kết nối mạng hoặc thử tải lại trang.</p>';
+        } else {
+            // Initialize Remarkable for Markdown rendering
+            const remarkable = new Remarkable({
+                html: false,
+                breaks: true,
+                typographer: true
+            });
+
+            // Update message preview
+            function updatePreview() {
+                const message = document.getElementById('message').value;
+                const preview = document.getElementById('preview');
+                const previewContainer = document.getElementById('previewContainer');
+                if (message) {
+                    preview.innerHTML = remarkable.render(message);
+                    previewContainer.classList.remove('hidden');
+                } else {
+                    previewContainer.classList.add('hidden');
+                }
+            }
+        }
+
+        // Update current time every second
+        function updateTime() {
+            const now = new Date();
+            const options = {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                timeZone: 'Asia/Ho_Chi_Minh'
+            };
+            const timeString = now.toLocaleString('vi-VN', options).replace(',', '');
+            document.getElementById('currentTime').textContent = timeString;
+        }
+
+        // Load saved webhook URL, theme preference, and start time update
+        function initialize() {
+            const savedWebhook = localStorage.getItem('webhookUrl');
+            if (savedWebhook) document.getElementById('webhookUrl').value = savedWebhook;
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark');
+            }
+            loadHistory();
+            if (typeof Remarkable !== 'undefined') updatePreview();
+            updateTime();
+            setInterval(updateTime, 1000);
+        }
+
+        // Load message history from localStorage
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('messageHistory') || '[]');
+            const historyList = document.getElementById('history');
+            historyList.innerHTML = '';
+            history.forEach((msg, index) => {
+                const li = document.createElement('li');
+                li.className = 'history-item text-sm text-gray-600 dark:text-gray-300 p-2 border-b last:border-b-0 flex justify-between items-center';
+                li.innerHTML = `
+                    <span>${msg.username || 'Ẩn danh'}: ${msg.content} (${new Date(msg.timestamp).toLocaleString('vi-VN')})</span>
+                    <button class="delete-btn" onclick="deleteMessage(${index})">
+                        <svg class="h-4 w-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                `;
+                historyList.appendChild(li);
+            });
+        }
+
+        // Save message to localStorage
+        function saveMessage(content, username) {
+            const history = JSON.parse(localStorage.getItem('messageHistory') || '[]');
+            history.push({ content, username, timestamp: Date.now() });
+            localStorage.setItem('messageHistory', JSON.stringify(history));
+            loadHistory();
+        }
+
+        // Delete single message
+        function deleteMessage(index) {
+            const history = JSON.parse(localStorage.getItem('messageHistory') || '[]');
+            history.splice(index, 1);
+            localStorage.setItem('messageHistory', JSON.stringify(history));
+            loadHistory();
+            showToast('Đã xóa tin nhắn!', 'bg-green-600');
+        }
+
+        // Clear message history
+        function clearHistory() {
+            localStorage.removeItem('messageHistory');
+            loadHistory();
+            showToast('Lịch sử tin nhắn đã được xóa!', 'bg-green-600');
+        }
+
+        // Show toast notification
+        function showToast(message, bgColor) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${bgColor} text-white`;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Send message to Discord
+        async function sendMessage() {
+            const webhookUrl = document.getElementById('webhookUrl').value.trim();
+            const message = document.getElementById('message').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const avatarUrl = document.getElementById('avatarUrl').value.trim();
+            const sendButton = document.getElementById('sendButton');
+            const sendText = document.getElementById('sendText');
+            const loadingIcon = document.getElementById('loadingIcon');
+
+            // Validate inputs
+            if (!webhookUrl) {
+                showToast('Vui lòng nhập URL webhook!', 'bg-red-600');
+                return;
+            }
+            if (!message) {
+                showToast('Vui lòng nhập tin nhắn!', 'bg-red-600');
+                return;
+            }
+            if (!webhookUrl.match(/^https:\/\/discord\.com\/api\/webhooks\//)) {
+                showToast('URL webhook không hợp lệ! Phải bắt đầu bằng https://discord.com/api/webhooks/', 'bg-red-600');
+                return;
+            }
+
+            // Save webhook URL
+            localStorage.setItem('webhookUrl', webhookUrl);
+
+            // Show loading state
+            sendButton.disabled = true;
+            sendText.textContent = 'Đang gửi...';
+            loadingIcon.classList.remove('hidden');
+
+            try {
+                const payload = { content: message };
+                if (username) payload.username = username;
+                if (avatarUrl) payload.avatar_url = avatarUrl;
+
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    showToast('Tin nhắn đã được gửi thành công!', 'bg-green-600');
+                    saveMessage(message, username);
+                    document.getElementById('message').value = '';
+                    if (typeof Remarkable !== 'undefined') updatePreview();
+                } else {
+                    showToast('Lỗi khi gửi tin nhắn. Kiểm tra URL webhook!', 'bg-red-600');
+                }
+            } catch (error) {
+                showToast('Đã xảy ra lỗi: ' + error.message, 'bg-red-600');
+            } finally {
+                sendButton.disabled = false;
+                sendText.textContent = 'Gửi';
+                loadingIcon.classList.add('hidden');
+            }
+        }
+
+        // Toggle theme
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', initialize);
+        document.getElementById('message').addEventListener('input', () => {
+            if (typeof Remarkable !== 'undefined') updatePreview();
+        });
+        document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+    </script>
 </body>
 </html>
