@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Giới thiệu bản thân</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <style>
     body {
       margin: 0;
@@ -108,18 +109,9 @@
       animation-delay: 0.75s;
     }
     @keyframes neonPulse {
-      0% {
-        transform: scale(1);
-        opacity: 0.6;
-      }
-      50% {
-        transform: scale(1.3);
-        opacity: 0.2;
-      }
-      100% {
-        transform: scale(1.6);
-        opacity: 0;
-      }
+      0% { transform: scale(1); opacity: 0.6; }
+      50% { transform: scale(1.3); opacity: 0.2; }
+      100% { transform: scale(1.6); opacity: 0; }
     }
     .particle-burst {
       position: absolute;
@@ -140,19 +132,16 @@
       animation: burst 1s ease-out forwards;
     }
     @keyframes burst {
-      0% {
-        transform: translate(0, 0) scale(1);
-        opacity: 1;
-      }
-      100% {
-        transform: translate(var(--x), var(--y)) scale(0);
-        opacity: 0;
-      }
+      0% { transform: translate(0, 0) scale(1); opacity: 1; }
+      100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; }
     }
     .social-link {
       transition: transform 0.3s ease, background-color 0.3s ease;
       position: relative;
       overflow: hidden;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
       box-shadow: 0 0 10px rgba(0, 188, 212, 0.5);
     }
     .social-link::before {
@@ -198,10 +187,7 @@
       animation: fadeIn 1s forwards;
     }
     @keyframes fadeIn {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      to { opacity: 1; transform: translateY(0); }
     }
     .text-gray-600 {
       color: rgba(255, 255, 255, 0.8);
@@ -225,26 +211,28 @@
       </div>
       <h1 class="text-4xl font-bold text-white mb-4 mt-6">Khoi</h1>
       <div class="flex space-x-4 mb-8">
-        <a href="https://discord.gg/2NpBPjM4PF" target="_blank" class="social-link bg-blue-600 text-white px-5 py-2 rounded-full font-semibold">
-          Discord
+        <a href="https://discord.gg/2NpBPjM4PF" target="_blank"
+           class="social-link bg-[#5865F2] text-white px-5 py-2 rounded-full font-semibold">
+          <i class="ph ph-discord-logo text-2xl"></i> Discord
         </a>
-        <a href="https://www.youtube.com/@khoitongDZ999" target="_blank" class="social-link bg-red-600 text-white px-5 py-2 rounded-full font-semibold">
-          YouTube
+        <a href="https://www.youtube.com/@khoitongDZ999" target="_blank"
+           class="social-link bg-[#FF0000] text-white px-5 py-2 rounded-full font-semibold">
+          <i class="ph ph-youtube-logo text-2xl"></i> YouTube
         </a>
-        <a href="https://github.com/khoitongdz" target="_blank" class="social-link bg-gray-800 text-white px-5 py-2 rounded-full font-semibold">
-          GitHub
+        <a href="https://github.com/khoitongdz" target="_blank"
+           class="social-link bg-[#181717] text-white px-5 py-2 rounded-full font-semibold">
+          <i class="ph ph-github-logo text-2xl"></i> GitHub
         </a>
       </div>
       <div class="w-full mt-6">
         <h2 class="section-title text-2xl font-semibold">Liên hệ</h2>
         <p class="text-gray-600">
-          Email: <a href="mailto:khoitong0000@gmail.com" class="text-blue-600 hover:underline">khoitong0000@gmail.com</a><br>
+          Email: <a href="mailto:khoitong0000@gmail.com" class="text-blue-600 hover:underline">khoitong0000@gmail.com</a>
         </p>
       </div>
     </div>
   </div>
   <script>
-    // Khởi tạo Particles.js cho nền
     particlesJS('particles-js', {
       particles: {
         number: { value: 100, density: { enable: true, value_area: 800 } },
@@ -253,7 +241,7 @@
         opacity: { value: 0.6, random: true },
         size: { value: 3, random: true },
         line_linked: { enable: true, distance: 150, color: '#00bcd4', opacity: 0.3, width: 1 },
-        move: { enable: true, speed: 3, direction: 'none', random: true, straight: false, out_mode: 'out' }
+        move: { enable: true, speed: 3, random: true, out_mode: 'out' }
       },
       interactivity: {
         detect_on: 'canvas',
@@ -263,10 +251,9 @@
       retina_detect: true
     });
 
-    // Hiệu ứng particle burst quanh avatar khi hover
     const profileImgContainer = document.querySelector('.profile-img-container');
     const particleBurst = document.querySelector('.particle-burst');
-    
+
     profileImgContainer.addEventListener('mouseenter', () => {
       for (let i = 0; i < 10; i++) {
         const particle = document.createElement('div');
@@ -280,7 +267,6 @@
       }
     });
 
-    // Hiệu ứng parallax nhẹ cho card
     window.addEventListener('mousemove', (e) => {
       const card = document.querySelector('.card');
       const moveX = (e.clientX / window.innerWidth - 0.5) * 20;
@@ -288,7 +274,6 @@
       card.style.transform = `translate(${moveX}px, ${moveY}px) translateY(-15px)`;
     });
 
-    // Hiệu ứng fade-in cho các phần tử
     document.querySelectorAll('.fade-in').forEach((el, index) => {
       el.style.animationDelay = `${index * 0.2}s`;
     });
