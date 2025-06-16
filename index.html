@@ -1,1493 +1,298 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Bắn Tàu Vũ Trụ</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: radial-gradient(circle, #1a1a4a, #000012);
-            overflow: hidden;
-            font-family: 'Orbitron', sans-serif;
-        }
-        canvas {
-            border: 3px solid #00ffcc;
-            border-radius: 12px;
-            box-shadow: 0 0 25px rgba(0, 255, 204, 0.7);
-            background: rgba(0, 0, 40, 0.4);
-            max-width: 100%;
-            max-height: 100%;
-        }
-        #score {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: #00ffcc;
-            font-size: 26px;
-            font-weight: 700;
-            text-shadow: 0 0 12px #00ffcc;
-            transition: transform 0.2s ease, color 0.5s ease;
-        }
-        #score.update {
-            transform: scale(1.2);
-            color: #ffd700;
-        }
-        #energyBar {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 150px;
-            height: 15px;
-            background: rgba(0, 0, 0, 0.7);
-            border: 2px solid #00ffcc;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        #energyFill {
-            height: 100%;
-            background: linear-gradient(90deg, #00ffcc, #00b386);
-            transition: width 0.3s ease;
-        }
-        #powerUpTimer, #shieldStatus {
-            position: absolute;
-            top: 50px;
-            left: 20px;
-            color: #ffd700;
-            font-size: 22px;
-            font-weight: 700;
-            text-shadow: 0 0 12px #ffd700;
-            display: none;
-        }
-        #shieldStatus {
-            top: 80px;
-            color: #00ccff;
-            text-shadow: 0 0 12px #00ccff;
-        }
-        #gameOver, #winScreen, #pauseScreen, #bossWarning, #upgradeScreen {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 50px;
-            font-weight: 700;
-            text-shadow: 0 0 20px currentColor;
-            display: none;
-            text-align: center;
-            color: #fff;
-            background: rgba(0, 0, 0, 0.95);
-            padding: 25px;
-            border-radius: 18px;
-            border: 3px solid #00ffcc;
-            box-shadow: 0 0 30px rgba(0, 255, 204, 0.5);
-        }
-        #gameOver {
-            color: #ff5555;
-        }
-        #winScreen {
-            color: #00ffcc;
-        }
-        #bossWarning {
-            color: #ffd700;
-            font-size: 40px;
-        }
-        #upgradeScreen {
-            font-size: 26px;
-            max-width: 450px;
-        }
-        #pauseScreen h2 {
-            font-size: 2.5rem;
-            margin-bottom: 1.5rem;
-            text-shadow: 0 0 15px #00ffcc;
-        }
-        #startScreen {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.95);
-            padding: 2.5rem;
-            border-radius: 18px;
-            color: #fff;
-            text-align: center;
-            max-width: 550px;
-            box-shadow: 0 0 30px rgba(0, 255, 204, 0.5);
-            border: 3px solid #00ffcc;
-            z-index: 1000;
-        }
-        #startScreen h1 {
-            font-size: 3rem;
-            margin-bottom: 1.5rem;
-            text-shadow: 0 0 15px #00ffcc;
-        }
-        #startScreen p {
-            font-size: 1.2rem;
-            margin-bottom: 1.5rem;
-            line-height: 1.6;
-        }
-        #playerNameInput {
-            padding: 0.8rem;
-            font-size: 1.2rem;
-            margin-bottom: 0.8rem;
-            width: 200px;
-            border: 3px solid #00ffcc;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.15);
-            color: #fff;
-            font-family: 'Orbitron', sans-serif;
-            text-align: center;
-            box-shadow: 0 0 12px rgba(0, 255, 204, 0.4);
-        }
-        #playerNameInput:focus {
-            outline: none;
-            box-shadow: 0 0 20px rgba(0, 255, 204, 0.8);
-        }
-        #nameError {
-            color: #ff5555;
-            font-size: 1rem;
-            margin-bottom: 1.2rem;
-            display: none;
-        }
-        #startButton, #pauseButton, #resumeButton {
-            padding: 1.2rem 2.5rem;
-            font-size: 1.3rem;
-            background: linear-gradient(45deg, #00ffcc, #00b386);
-            border: none;
-            border-radius: 12px;
-            color: #fff;
-            cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            box-shadow: 0 0 20px rgba(0, 255, 204, 0.8);
-        }
-        #startButton:hover, #pauseButton:hover, #resumeButton:hover {
-            transform: scale(1.15);
-            box-shadow: 0 0 25px rgba(0, 255, 204, 1);
-        }
-        #pauseButton {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            padding: 0.8rem 1.5rem;
-            font-size: 1.1rem;
-        }
-        #resumeButton {
-            margin-top: 1.5rem;
-        }
-        #touchControls {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 20px;
-            opacity: 0.8;
-            display: none;
-        }
-        .touchButton {
-            width: 60px;
-            height: 60px;
-            background: rgba(0, 255, 204, 0.3);
-            border: 2px solid #00ffcc;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            color: #fff;
-            text-shadow: 0 0 10px #00ffcc;
-            touch-action: none;
-        }
-        .touchButton:active {
-            background: rgba(0, 255, 204, 0.6);
-            transform: scale(0.95);
-        }
-        @media (max-width: 600px) {
-            #touchControls {
-                display: flex;
-            }
-            canvas {
-                max-height: 80vh;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Giới thiệu bản thân</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Arial', sans-serif;
+      overflow-x: hidden;
+      position: relative;
+    }
+    #particles-js {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #1e3a8a, #7c3aed, #db2777);
+      background-size: 200% 200%;
+      animation: gradient 10s ease infinite;
+      z-index: -1;
+    }
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      border: 1px solid transparent;
+      border-radius: 1.5rem;
+      padding: 3rem;
+      max-width: 700px;
+      margin: 2rem auto;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+      position: relative;
+      z-index: 1;
+      color: #ffffff;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, #00bcd4, #7c3aed, #00bcd4);
+      z-index: -1;
+      border-radius: 1.5rem;
+      filter: blur(8px);
+      animation: borderGlow 5s linear infinite;
+    }
+    @keyframes borderGlow {
+      0% { background-position: 0%; }
+      100% { background-position: 400%; }
+    }
+    .card:hover {
+      transform: translateY(-15px);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+    }
+    .profile-img-container {
+      position: relative;
+      display: inline-block;
+    }
+    .profile-img {
+      border-radius: 50%;
+      border: 4px solid rgba(255, 255, 255, 0.9);
+      width: 160px;
+      height: 160px;
+      transition: transform 0.5s ease;
+      position: relative;
+      z-index: 2;
+    }
+    .profile-img:hover {
+      transform: scale(1.1);
+    }
+    .neon-pulse {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1;
+    }
+    .neon-pulse::before,
+    .neon-pulse::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 50%;
+      box-shadow: 0 0 20px #00bcd4, 0 0 40px #00bcd4, 0 0 60px #00bcd4;
+      animation: neonPulse 1.5s ease-in-out infinite;
+    }
+    .neon-pulse::after {
+      animation-delay: 0.75s;
+    }
+    @keyframes neonPulse {
+      0% {
+        transform: scale(1);
+        opacity: 0.6;
+      }
+      50% {
+        transform: scale(1.3);
+        opacity: 0.2;
+      }
+      100% {
+        transform: scale(1.6);
+        opacity: 0;
+      }
+    }
+    .particle-burst {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 160px;
+      height: 160px;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 3;
+    }
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #00bcd4;
+      border-radius: 50%;
+      animation: burst 1s ease-out forwards;
+    }
+    @keyframes burst {
+      0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(var(--x), var(--y)) scale(0);
+        opacity: 0;
+      }
+    }
+    .social-link {
+      transition: transform 0.3s ease, background-color 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0, 188, 212, 0.5);
+    }
+    .social-link::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 10%, transparent 20%);
+      transform: rotate(45deg);
+      transition: transform 0.5s ease;
+    }
+    .social-link:hover::before {
+      transform: rotate(45deg) translate(50%, 50%);
+    }
+    .social-link:hover {
+      transform: scale(1.15);
+      box-shadow: 0 0 20px #00bcd4;
+    }
+    .section-title {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 1rem;
+      color: #ffffff;
+    }
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 50%;
+      height: 3px;
+      background: #00bcd4;
+      transition: width 0.3s ease;
+    }
+    .section-title:hover::after {
+      width: 100%;
+    }
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeIn 1s forwards;
+    }
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .text-gray-600 {
+      color: rgba(255, 255, 255, 0.8);
+    }
+    a.text-blue-600 {
+      color: #00bcd4;
+    }
+    a.text-blue-600:hover {
+      color: #ffffff;
+    }
+  </style>
 </head>
 <body>
-    <div id="score" role="status" aria-live="polite">Điểm: 0</div>
-    <div id="energyBar">
-        <div id="energyFill" style="width: 100%"></div>
+  <div id="particles-js"></div>
+  <div class="card fade-in">
+    <div class="flex flex-col items-center">
+      <div class="profile-img-container">
+        <img src="https://images-ext-1.discordapp.net/external/q6FQ4Syf8Q1K0C4vCiJOmkRx4gUlSPDH8EgKKTEvjGA/%3Fsize%3D4096/https/cdn.discordapp.com/avatars/1253726505402499203/d53a32ffe3ff9ec16b638d4ffa0daf35.png?format=webp&quality=lossless&width=587&height=587" alt="Profile Picture" class="profile-img">
+        <div class="neon-pulse"></div>
+        <div class="particle-burst"></div>
+      </div>
+      <h1 class="text-4xl font-bold text-white mb-4 mt-6">Khoi/h1>
+      <div class="flex space-x-4 mb-8">
+        <a href="https://discord.gg/2NpBPjM4PF" target="_blank" class="social-link bg-blue-600 text-white px-5 py-2 rounded-full font-semibold">
+          Discord
+        </a>
+        <a href="https://www.youtube.com/@khoitongDZ999" target="_blank" class="social-link bg-red-600 text-white px-5 py-2 rounded-full font-semibold">
+          YouTube
+        </a>
+        <a href="https://github.com/khoitongdz" target="_blank" class="social-link bg-gray-800 text-white px-5 py-2 rounded-full font-semibold">
+          GitHub
+        </a>
+      </div>
+      <div class="w-full mt-6">
+        <h2 class="section-title text-2xl font-semibold">Liên hệ</h2>
+        <p class="text-gray-600">
+          Email: <a href="mailto:khoitong0000@gmail.com" class="text-blue-600 hover:underline">khoitong0000@gmail.com</a><br>
+          Hoặc nhắn tin trực tiếp qua Discord!
+        </p>
+      </div>
     </div>
-    <div id="powerUpTimer" role="status" aria-live="polite">Siêu Đạn Cấp 1: 90s</div>
-    <div id="shieldStatus" role="status" aria-live="polite">Lá Chắn: 1 lần</div>
-    <div id="gameOver" role="alert">Thua Cuộc!<br>Nhấn R để Chơi Lại</div>
-    <div id="winScreen" role="alert">Chiến Thắng!<br>Nhấn R để Tiếp Tục</div>
-    <div id="bossWarning" role="alert">Boss Xuất Hiện!</div>
-    <div id="startScreen">
-        <h1>Game Bắn Tàu Vũ Trụ</h1>
-        <input id="playerNameInput" type="text" placeholder="Nhập tên (3-15 ký tự)" maxlength="15" autofocus tabindex="0" aria-label="Nhập tên người chơi">
-        <div id="nameError">Tên phải từ 3-15 ký tự, không chứa <>&</div>
-        <p>Sử dụng <strong>MŨI TÊN TRÁI/PHẢI</strong> hoặc <strong>CHẠM VÀ KÉO</strong> để di chuyển tàu.<br>
-           Nhấn <strong>PHÍM CÁCH</strong> hoặc <strong>CHẠM MÀN HÌNH</strong> để bắn đạn.<br>
-           Tiêu diệt kẻ thù: <strong>Đỏ</strong> (10 điểm), <strong>Cam</strong> (15 điểm, ziczac), <strong>Tím</strong> (20 điểm), <strong>Xanh lam</strong> (50 điểm), <strong>Xám</strong> (100 điểm, 3 máu), <strong>Trắng</strong> (30 điểm, tàng hình), <strong>Vàng</strong> (40 điểm, phân tách), <strong>Đỏ đậm</strong> (60 điểm, bắn đạn).<br>
-           Đấu với boss <strong>Thiên Thần</strong> tại <strong>19,000 điểm</strong> (1000 điểm).<br>
-           Bắn trúng <strong>khối vàng</strong> để tăng cấp siêu đạn (6→12 luồng, cộng dồn 90s).<br>
-           Bắn trúng <strong>khối xanh</strong> để thêm 1 lá chắn (cộng dồn).<br>
-           Nhấn <strong>U</strong> để mở menu nâng cấp (Tốc độ, Tốc độ bắn, Lá chắn, Đạn nổ).<br>
-           Đạt <strong>20,000 điểm</strong> để chiến thắng!<br>
-           Nhấn <strong>R</strong> để chơi lại, <strong>P</strong> để tạm dừng/tiếp tục.</p>
-        <button id="startButton" aria-label="Bắt đầu trò chơi">Bắt Đầu Chơi</button>
-    </div>
-    <div id="pauseScreen">
-        <h2>Trò Chơi Tạm Dừng</h2>
-        <button id="resumeButton" aria-label="Tiếp tục trò chơi">Tiếp Tục Chơi</button>
-    </div>
-    <div id="upgradeScreen">
-        <h2>Nâng Cấp Tàu</h2>
-        <p id="upgradeOptions"></p>
-        <p>Nhấn 1-4 để chọn, U hoặc Enter để đóng</p>
-    </div>
-    <button id="pauseButton" aria-label="Tạm dừng trò chơi" style="display: none;">Tạm Dừng</button>
-    <div id="touchControls">
-        <div class="touchButton" id="touchLeft">←</div>
-        <div class="touchButton" id="touchRight">→</div>
-        <div class="touchButton" id="touchShoot">🔫</div>
-    </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script>
-        let player, bullets, enemies, score, gameOver, gameWon, gameStarted, particles, stars, powerUp, powerUpActive, powerUpTimer, powerUpLevel, playerName, isPaused, boss, bossWarningTimer, bossCooldown, shield, shieldActive, shieldCount, showUpgradeMenu, upgrades, energy, touchLeft, touchRight, touchShoot;
+  </div>
+  <script>
+    // Khởi tạo Particles.js cho nền
+    particlesJS('particles-js', {
+      particles: {
+        number: { value: 100, density: { enable: true, value_area: 800 } },
+        color: { value: ['#ffffff', '#00bcd4'] },
+        shape: { type: ['circle', 'star'] },
+        opacity: { value: 0.6, random: true },
+        size: { value: 3, random: true },
+        line_linked: { enable: true, distance: 150, color: '#00bcd4', opacity: 0.3, width: 1 },
+        move: { enable: true, speed: 3, direction: 'none', random: true, straight: false, out_mode: 'out' }
+      },
+      interactivity: {
+        detect_on: 'canvas',
+        events: { onhover: { enable: true, mode: 'grab' }, onclick: { enable: true, mode: 'push' }, resize: true },
+        modes: { grab: { distance: 200, line_linked: { opacity: 1 } }, push: { particles_nb: 4 } }
+      },
+      retina_detect: true
+    });
 
-        function setup() {
-            let canvasSize = min(windowWidth * 0.9, windowHeight * 0.85 * (4/3));
-            createCanvas(canvasSize, canvasSize * (3/4));
-            resetGame();
-            gameStarted = false;
-            isPaused = false;
-            showUpgradeMenu = false;
-            boss = null;
-            bossWarningTimer = 0;
-            bossCooldown = 0;
-            energy = 100;
-            document.getElementById('startScreen').style.display = 'block';
-            document.getElementById('pauseButton').style.display = 'none';
-            noLoop();
+    // Hiệu ứng particle burst quanh avatar khi hover
+    const profileImgContainer = document.querySelector('.profile-img-container');
+    const particleBurst = document.querySelector('.particle-burst');
+    
+    profileImgContainer.addEventListener('mouseenter', () => {
+      for (let i = 0; i < 10; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        const angle = Math.random() * 2 * Math.PI;
+        const distance = Math.random() * 80 + 40;
+        particle.style.setProperty('--x', `${Math.cos(angle) * distance}px`);
+        particle.style.setProperty('--y', `${Math.sin(angle) * distance}px`);
+        particleBurst.appendChild(particle);
+        setTimeout(() => particle.remove(), 1000);
+      }
+    });
 
-            // Initialize stars
-            stars = Array(60).fill().map(() => ({
-                x: random(width),
-                y: random(height),
-                size: random(1, 5),
-                speed: random(0.8, 3),
-                layer: random(0.2, 1)
-            }));
+    // Hiệu ứng parallax nhẹ cho card
+    window.addEventListener('mousemove', (e) => {
+      const card = document.querySelector('.card');
+      const moveX = (e.clientX / window.innerWidth - 0.5) * 20;
+      const moveY = (e.clientY / window.innerHeight - 0.5) * 20;
+      card.style.transform = `translate(${moveX}px, ${moveY}px) translateY(-15px)`;
+    });
 
-            // Initialize gradients
-            playerGradient = drawingContext.createLinearGradient(0, -30, 0, 30);
-            playerGradient.addColorStop(0, '#00ffcc');
-            playerGradient.addColorStop(1, '#00b386');
-            bulletGradient = drawingContext.createRadialGradient(0, 0, 2, 0, 0, 6);
-            bulletGradient.addColorStop(0, '#ffffcc');
-            bulletGradient.addColorStop(1, '#ff9900');
-            powerUpGradient = drawingContext.createRadialGradient(0, 0, 6, 0, 0, 22);
-            powerUpGradient.addColorStop(0, '#ffd700');
-            powerUpGradient.addColorStop(1, '#ff5500');
-            shieldGradient = drawingContext.createRadialGradient(0, 0, 6, 0, 0, 22);
-            shieldGradient.addColorStop(0, '#00ccff');
-            shieldGradient.addColorStop(1, '#0066cc');
-            bossGradient = drawingContext.createRadialGradient(0, -50, 0, 0, 50);
-            bossGradient.addColorStop(0, '#ff5555');
-            bossGradient.addColorStop(1, '#ffd700');
-            enemyGradients = {
-                { small: drawingContext.createRadialGradient(0, -10, 10, 0, 10), }
-                { fast: drawingContext.createRadialGradient(0, -10, 0, 0, 10), }
-                { medium: drawingContext.createRadialGradient(0, -15, 0, 15), }
-                { large: drawingContext.createRadialGradient(0, -20, 0, 0, 20), }
-                { armored: drawingContext.createRadialGradient(0, -20, 0, 20), }
-                { stealth: drawingContext.createRadialGradient(0, -15, 0, 0, 15), }
-                { splitter: drawingContext.createRadialGradient(0, -20, 0, 0, 20), }
-                { shooter: drawingContext.createRadialGradient(0, -20, 0, 0, 20), }
-                { splitChild: drawingContext.createRadialGradient(0, -10, 0, 0, 10) }
-            };
-            enemyGradients.small.addColorStop(0, 'rgba(255, 99, 99, 1)');
-            enemyGradients.small.addColorStop(1, 'rgba(255, 99, 99, 0.5)');
-            enemyGradients.fast.addColorStop(0, 'rgba(255, 153, 51, 1)');
-            enemyGradients.fast.addColorStop(1, 'rgba(255, 153, 51, 0.5)');
-            enemyGradients.medium.addColorStop(0, 'rgba(153, 51, 153, 1)');
-            enemyGradients.medium.addColorStop(1, 'rgba(153, 51, 153, 0.5)');
-            enemyGradients.large.addColorStop(0, 'rgba(51, 153, 255, 1)');
-            enemyGradients.large.addColorStop(1, 'rgba(51, 153, 255, 0.5)');
-            enemyGradients.armored.addColorStop(0, 'rgba(150, 150, 150, 1)');
-            enemyGradients.armored.addColorStop(1, 'rgba(150, 150, 150, 0.5)');
-            enemyGradients.stealth.addColorStop(0, 'rgba(255, 255, 1)');
-            enemyGradients.stealth.addColorStop(1, 'rgba(255, 255, 255, 0.5)');
-            enemyGradients.splitter.addColorStop(0, 'rgba(255, 204, 0, 1)');
-            enemyGradients.splitter.addColorStop(1, 'rgba(255, 204, 0, 0.5)')            enemyGradients.shooter.addColorStop(0, 'rgba(200, 0, 0, 1)')            enemyGradients.shooter.addColorStop(1, 'rgba(200, 0, 0, 0.5)')            enemyGradients.splitChild.addColorStop(0, 'rgba(255, 204, 0, 1)')            enemyGradients.splitChild.addColorStop(1, 'rgba(255, 204, 0, 0.5)')           
-
-            // GSAP animations
-            gsap.from('#startScreen', { opacity: 0, y: 100, duration: 1.2, ease: 'power3.out' });
-            gsap.from('#startButton', { scale: 0.7, opacity: 0, duration: 1, delay: 0.6, ease: 'elastic.out(1, 0.4)' });
-
-            // Player name input handling
-            const playerNameInput = document.getElementById('playerNameInput');
-            playerNameInput.addEventListener('focus', () => playerNameInput.select());
-            playerNameInput.addEventListener('click', (e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                playerNameInput.focus();
-            });
-            playerNameInput.addEventListener('touchstart', (e) => {
-                e.stopPropagation();
-                playerNameInput.focus();
-            });
-            playerNameInput.addEventListener('input', () => {
-                let name = playerNameInput.value.trim().replace(/[<>&]/g, '');
-                document.getElementById('nameError').style.display = name.length < 3 ? 'block' : 'none';
-            });
-            playerNameInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') startGame();
-            });
-            document.getElementById('startButton').addEventListener('click', startGame);
-
-            // Touch controls
-            touchLeft = document.getElementById('touchLeft');
-            touchRight = document.getElementById('touchRight');
-            touchShoot = document.getElementById('touchShoot');
-
-            touchLeft.addEventListener('touchstart', (e') => {
-                e.preventDefault();
-                player.targetX -= player.speed * 2;
-            });
-            touchRight.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                player.targetX += player.speed * 2;
-            });
-            touchShoot.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                if (gameStarted && !gameOver && !gameWon && !isPaused && !showUpgradeMenu && bullets.length < 20) {
-                    shootBullets();
-                }
-            });
-
-            function startGame() {
-                let name = playerNameInput.value.trim().replace(/[<>&]/g, '');
-                if (name.length < 3 || name.length > 15) {
-                    document.getElementById('nameError').style.display = 'block';
-                    return;
-                }
-                playerName = name.substring(0, 15);
-                playerNameInput.value = playerName;
-                document.getElementById('nameError').style.display = 'none';
-                gsap.to('#startScreen', {
-                    opacity: 0,
-                    y: -100,
-                    duration: 0.8,
-                    ease: 'power3.in',
-                    onComplete: () => {
-                        document.getElementById('startScreen').style.display = 'none';
-                        document.getElementById('pauseButton').style.display = 'block';
-                        gameStarted = true;
-                        loop();
-                    }
-                });
-            }
-
-            document.getElementById('pauseButton').addEventListener('click', togglePause);
-            document.getElementById('resumeButton').addEventListener('click', togglePause);
-        }
-
-        function resetGame() {
-            player = {
-                x: width / 2,
-                y: y: height - 50,
-                size: size: 30,
-                speed: speed: 7,
-                targetX: targetX: width / 2,
-                velocityX: velocityX: 0
-            };
-            bullets = [];
-            enemies = [];
-            particles = [];
-            powerUp = null;
-            powerUpActive = false;
-            powerUpTimer = 0;
-            powerUpLevel = powerUpLevel: 0;
-            shield = null;
-            shieldActive = false;
-            shieldCount = shieldCount: 0;
-            upgrades = {
-                speedLevel: upgrades.speedLevel: 0,
-                fireRateLevel: upgrades.fireRateLevel: 0,
-                shieldLevel: upgrades.shieldLevel: 0,
-                explosiveLevel: upgrades.explosiveLevel: level0
-            };
-            score = 0;
-            energy = 100;
-            gameOver = false;
-            gameWon = false;
-            isPaused = false;
-            showUpgradeMenu = false;
-            boss = null;
-            bossWarningTimer = 0;
-            bossCooldown = 0;
-            playerName = '';
-            document.getElementById('playerNameInput').value = '';
-            document.getElementById('nameError').style.display = 'none';
-            document.getElementById('score').textContent = `Điểm: ${score}`;
-            document.getElementById('score').classList.remove('update');
-            document.getElementById('powerUpTimer').style.display = 'none';
-            document.getElementById('shieldStatus').style.display = 'none';
-            document.getElementById('gameOver').style.display = 'none';
-            document.getElementById('winScreen').style.display = 'none';
-            document.getElementById('pauseScreen').style.display = 'none';
-            document.getElementById('upgradeScreen').style.display = 'none';
-            document.getElementById('bossWarning').style.display = 'none';
-            document.getElementById('pauseButton').style.display = gameStarted ? 'block' : 'none';
-            document.getElementById('pauseButton').textContent = 'Tạm dừng';
-            document.getElementById('energyFill').style.width = '100%';
-            gsap.killTweensOf('#score, #gameOver, #winScreen, #bossWarning, #pauseScreen, #upgradeScreen');
-        }
-
-        function togglePause() {
-            if (!gameStarted || gameOver || gameWon) {
-                return;
-            }
-            isPaused = !isPaused;
-            if (isPaused) {
-                noLoop();
-                document.getElementById('pauseScreen').style.display = 'block';
-                document.getElementById('pauseButton').textContent = 'Tiếp tục';
-                gsap.from('#pauseScreen', { opacity: 0, scale: 0.7, duration: 0.6, ease: 'power3.out' });
-            } else {
-                loop();
-                else {
-                document.getElementById('pauseScreen').style.display = 'none';
-                document.getElementById('pauseButton').textContent.set = 'Tạm dừng';
-                gsap.to('#pauseScreen', { opacity: 0, scale: 0.7, duration: 0.6, ease: 'power3.in' });
-            }
-        }
-
-        function toggleUpgradeMenu() {
-            if (!gameStarted || gameOver || gameWon || isPaused) {
-                return;
-            }
-            showUpgradeMenu = !showUpgradeMenu;
-            if (showUpgradeMenu) {
-                noLoop();
-                document.getElementById('upgradeScreen').style.display = 'block';
-                updateUpgradeOptions();
-                gsap.from('#upgradeScreen', { opacity: 0, scale: 0.7, duration: 0.6, ease: 'power3.out' });
-            } else {
-                loop();
-                document.getElementById('upgradeScreen').style.display = 'none';
-                gsap.to('#upgradeScreen', { opacity: 0, scale: 0.7, duration: 0.6, ease: 'power3.in' });
-            }
-        }
-
-        function updateUpgradeOptions() {
-            let options = [
-                `1. Tốc độ (Cấp ${upgrades.speedLevel}/3): ${upgrades.speedLevel < 3 ? (upgrades.speedLevel + 1) * 100 : 'Tối đa'} điểm`,
-                `2. Tốc độ bắn (Cấp ${upgrades.fireRateLevel}/3): ${upgrades.fireRateLevel < 3 ? (upgrades.fireRateLevel + 1) * 150 : 'Tối đa'} điểm`,
-                `3. Lá chắn (Cấp ${upgrades.shieldLevel}/3): ${upgrades.shieldLevel < 3 ? (upgrades.shieldLevel + 1) * 200 : 'Tối đa'} điểm`,
-                `4. Đạn nổ (Cấp ${upgrades.explosiveLevel}/2): ${upgrades.explosiveLevel < 2 ? (upgrades.explosiveLevel + 1) * 300 : 'Tối đa'} điểm`
-            ];
-            document.getElementById('upgradeOptions').appendinnerHTML = options.join('<br>');
-        }
-
-        function touchMoved() {
-            if (gameStarted && !gameOver && !gameWon && !isPaused && !showUpgradeMenu && player) {
-                player.targetX = constrain(document.mouseX, player.size / 2, width - player.size / 2);
-            }
-            return false;
-        }
-
-        function touchStarted() {
-            if (!gameStarted || !player) {
-                return true;
-            }
-            if (gameStarted && !gameOver && !gameWon && !isPaused && !showUpgradeMenu && bullets.length < 20) {
-                shootBullets();
-            }
-            return false;
-        }
-
-        function shootBullets() {
-            if (!player || bullets.length >= 20 || energy < 5) {
-                return;
-            }
-            let fireRate = (15 - upgrades.fireRateLevel);
-            energy -= 5;
-            document.getElementById('energyFill').style.width = `${energy}%`;
-            if (powerUpActive) {
-                let numStreams = (6 + powerUpLevel * 2);
-                let angleStep = (60 / (numStreams - 1));
-                for (let i = 0; i < numStreams; i++) {
-                    let angle = (-30 + i * angleStep);
-                    let rad = radians(angle);
-                    bullets.push({
-                        x: player.x,
-                        y: playery - player.size,
-                        speedX: Math.sin(rad) * 15,
-                        speedY: -Math.cos(rad) * 15,
-                        isPowerBullet: true,
-                        isExplosive: upgrades.explosiveLevel > 0,
-                        explosionRadius: upgrades.explosiveLevel * 20
-                    });
-                    particles.push({
-                        x: player.x,
-                        y: player.y - player.size,
-                        vx: random(-1.5, 1.5),
-                        vy: random(-2, -3),
-                        size: random(2, 4),
-                        alpha: 200,
-                        color: [255, 255, 102]
-                    });
-                }
-            } else {
-                bullets.push({
-                    x: player.x,
-                    y: player.y - player.size,
-                    speedX: 0,
-                    speedY: -12,
-                    isExplosive: upgrades.explosiveLevel > 0,
-                    explosionRadius: upgrades.explosiveLevel * 20
-                });
-                particles.push({
-                    x: player.x,
-                    y: player.y - player.size,
-                    vx: random(-1.5, 1.5),
-                    vy: random(-2, -3),
-                    size: random(2, 4),
-                    alpha: 200,
-                    color: [255, 255, 102]
-                });
-            }
-        }
-
-        function draw() {
-            background(0, 0, 40);
-
-            // Draw stars
-            for (let star of stars) {
-                if (!star) continue;
-                fill(255, random(200, 255));
-                noStroke();
-                ellipse(star.x, star.y, star.size * star.layer);
-                star.y += star.speed * star.layer;
-                if (star.y > height) {
-                    star.y = -star.size;
-                }
-            }
-
-            if (gameStarted && !gameOver && !gameWon && !isPaused && !showUpgradeMenu && player) {
-                // Player movement
-                if (keyIsDown(LEFT_ARROW)) {
-                    player.targetX -= player.speed;
-                }
-                if (keyIsDown(RIGHT_ARROW)) {
-                    player.targetX += player.speed;
-                }
-                player.targetX = constrain(player.x, player.size / 2, width - player.size / 2);
-                let dx = player.targetX - player.x;
-                player.velocityX.x = dx * 0.2;
-                player.x += player.velocityX;
-                player.x = constrain(player.x, player.size / 2, width - player.size / 2);
-
-                // Update player speed
-                player.speed = (7 + upgrades.speedLevel * 1.5);
-
-                // Regenerate energy
-                if (energy < 100) {
-                    energy += 0.1;
-                    document.getElementById('energyFill').style.width = `${energy}%`;
-                }
-
-                // Draw player
-                drawingContext.save();
-                drawContext.translate(player.x, player.y);
-
-                // Glow effect
-                drawingContext.shadowBlur = 20';
-                drawingContext.shadowColor = 'rgba(0, 255, 204, 0.8)';
-
-                // Main body
-                drawingContext.fillStyle = playerGradient;
-                drawContext.strokeStyle = 'rgba(0, 255,204, 220)';
-                strokeWeight(4);
-                beginShape();
-                vertex(0, -player.size * 0.9);
-                vertex(-player.size * 0.5, -player.size * 0.3);
-                vertex(-player.size * 0.7, player.size * 0.5);
-                vertex(-player.size * 0.2, player.size * 0.7);
-                vertex(player.size * 0.2, player.size * 0.7);
-                vertex(player.size * 0.7, player.size * 0.5);
-                vertex(player.size * 0.5, -player.size * 0.3);
-                endShape(CLOSE);
-
-                // Cockpit
-                fill(255, 255, 255, 120);
-                noStroke();
-                ellipse(0, -player.size * 0.4, player.size * 0.4, player.size * 0.25);
-
-                // Thrusters with enhanced spark effect
-                let flicker = Math.sin(frameCount * 0.4) * 3 + 10;
-                fill(255, 153, 51, 220);
-                noStroke();
-                triangle(
-                    -player.size * 0.2,
-                    player.size * 0.7,
-                    player.size * 0.2,
-                    player.size * 0.7,
-                    );
-0, player.size * 0.7 + flicker
-                );
-
-                // Spark particles when moving
-                if (Math.abs(player.velocityX) > 0.5 && frameCount % 3 === 0 && particles.length < 200) {
-                    particles.push({
-                        x: player.x + random(-player.size * 0.2, player.size * 0.2),
-                        y: player.y + player.size + flicker,
-                        vx: random(-2, 2) - player.velocityX * 0.2,
-                        vy: random(2, 4),
-                        size: random(2, 5),
-                        alpha: 255,
-                        color: [255, random(153, 204), random(51, 102)]
-                    });
-                }
-
-                // Wing details
-                stroke(255, 255, 255, 180);
-                strokeWeight(2);
-                line(-player.size * 0.6, player.size * 0.4, -player.size * -0.4, player.size * 0.6);
-                line(player.size * 0.6, player.size * 0.4, player.size, 0.4, player.size * 0.6);
-
-                // Shield
-                if (shieldActive) {
-                    noFill();
-                    stroke(0, 204, 255, 180);
-                    strokeWeight(5);
-                    ellipse(0, 0, player.size * 1.8);
-                }
-
-                drawingContext.restoreShadowBlur = 0;
-                drawContext.restore();
-
-                // Draw player name
-                textAlign(CENTER);
-                textSize(18);
-                fill(255, 255, 255);
-                stroke(0, 255, 204, 150);
-                strokeWeight(2);
-                text(playerName, player.x, player.y - player.size - 15);
-                strokeWeight(1);
-                stroke(0);
-
-                // Shoot bullets
-                let fireRate = (6 - upgrades.fireRateLevel);
-                if (keyIsDown(32) && frameCount % fireRate === 0) {
-                    shootBullets();
-                }
-
-                // Update power-up timer
-                if (powerUpActive) {
-                    powerUpTimer--;
-                    document.getElementById('powerUpTimer').style.display = 'block';
-                    document.getElementById('powerUpTimer').textContent = `Siêu Đạn Cấp ${powerUpLevel}: ${Math.floor(powerUpTimer / 60)}s`;
-                    if (powerUpTimer <= 0) {
-                        powerUpActive = false;
-                        powerUpLevel = 0;
-                        document.getElementById('powerUpTimer').style.display = 'none';
-                    }
-                }
-
-                // Update shield status
-                if (shieldActive) {
-                    document.getElementById('shieldStatus').style.display = 'block';
-                    document.getElementById('shieldStatus').textContent = `Lá Chắn: ${shieldCount} lần`;
-                } else {
-                    document.getElementById('shieldStatus').style.display = 'none';
-                }
-
-                // Check win condition
-                if (score >= 20000) {
-                    gameWon = true;
-                    document.getElementById('winScreen').style.display = 'block';
-                    document.getElementById('pauseButton').style.display = 'none';
-                    gsap.fromTo('#winScreen', { scale: 0.7, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.8, ease: 'power3.out' });
-                    noLoop();
-                }
-
-                // Boss warning
-                if (score >= 18900 && score < 19000 && !boss && bossWarningTimer <= 0 && bossCooldown <= 0) {
-                    bossWarningTimer = 120;
-                    document.getElementById('bossWarning').style.display = 'block';
-                    gsap.fromTo('#bossWarning', { scale: 0.7, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.8, ease: 'power3.out' });
-                }
-                if (bossWarningTimer > 0) {
-                    bossWarningTimer--;
-                    if (bossWarningTimer <= 0) {
-                        document.getElementById('bossWarning').style.display = 'none';
-                    }
-                // Spawn boss
-                if (score >= 19000 && !boss && bossWarningTimer <= 0 && bossCooldown <= 0) {
-                    boss = {
-                        x: width / 2,
-                        y: 100,
-                        size: 50,
-                        speedX: 3,
-                        health: 200,
-                        points: 1000,
-                        shootTimer: 0,
-                        targetX: width / 2,
-                        velocityX: 0
-                    };
-                    enemies = [];
-                }
-
-                // Update boss cooldown
-                if (bossCooldown > 0) {
-                    bossCooldown--;
-                }
-
-                // Draw and move boss
-                if (boss) {
-                    boss.targetX = width / 2 + Math.sin(frameCount * 0.02) * (width / 4));
-                    let dx = boss.targetX - boss.x;
-                    boss.velocityX = dx * 0.1;
-                    boss.x += boss.velocityX;
-                    boss.x = constrain(boss.x, boss.size, width - boss.size);
-                    boss.shootTimer--;
-                    if (bossTimer <= 0) {
-                        bullets.push({
-                            x: boss.x,
-                            y: boss.y + boss.size,
-                            speedX: (player.x - boss.x) * 0.05,
-                            speedY: 8,
-                            isBossBullet: true
-                        });
-                        boss.shootTimer = 15;
-                    }
-                    let pulse = Math.sin(frameCount * 0.1) * 10 + boss.size;
-                    drawingContext.save();
-                    drawContext.translate(boss.x, boss.y);
-                    
-                    // Glow effect
-                    drawingContext.shadowBlur = 30;
-                    drawContext.shadowColor = 'rgba(255, 215, 0, 0.7)';
-                    
-                    // Energy aura
-                    let auraPulse = Math.sin(frameCount * 0.05) * 10 + pulse * 1.5;
-                    noFill();
-                    stroke(255, 215, 0, 100);
-                    strokeWeight(6);
-                    ellipse(0, 0, auraPulse, auraPulse * 0.8);
-                    
-                    // Main body
-                    drawingContext.fillStyle = bossGradient;
-                    drawContext.stroke(200, 50, 50, 200);
-                    strokeWeight(5);
-                    beginShape();
-                    for (let i = 0; i < 8; i++) {
-                        let angle = i * TWO_PI / 8 + frameCount * 0.02;
-                        let r = pulse * (i % 2 === 0 ? 0.8 : 0.6);
-                        vertex(cos(angle) * r, sin(angle) * r * 0.7);
-                    }
-                    endShape(CLOSE);
-                    
-                    // Energy core
-                    let corePulse = Math.sin(frameCount * 0.15) * 8 + pulse * 0.4;
-                    let coreGradient = drawingContext.createRadialGradient(0, 0, 5, 0, 0, corePulse);
-                    coreGradient.addColorStop(0, '#ff5555');
-                    coreGradient.addColorStop(1, '#ffffff');
-                    drawingContext.fillStyle = coreGradient;
-                    noStroke();
-                    ellipse(0, 0, corePulse, corePulse);
-                    
-                    // Large wings
-                    let largeWingAngle = Math.sin(frameCount * 0.04) * 15;
-                    stroke(255, 215, 0, 180);
-                    strokeWeight(6);
-                    beginShape();
-                    vertex(-pulse * 0.5, 0);
-                    quadraticVertex(-pulse * 1.5, -pulse * 0.9, -pulse * 2.2, -pulse * 0.4 + largeWingAngle);
-                    endShape();
-                    beginShape();
-                    vertex(pulse * 0.5, 0);
-                    quadraticVertex(pulse * 1.5, -pulse * 0.9, pulse * 2.2, -pulse * 0.4 + largeWingAngle);
-                    endShape();
-                    
-                    // Small wings
-                    let smallWingAngle = Math.sin(frameCount * 0.06) * 10;
-                    stroke(255, 215, 0, 150);
-                    strokeWeight(4);
-                    beginShape();
-                    vertex(-pulse * 0.3, pulse * 0.5);
-                    quadraticVertex(-pulse * 1.0, pulse * 0.2, -pulse * 1.4, pulse * 0.7 + smallWingAngle);
-                    endShape();
-                    beginShape();
-                    vertex(pulse * 0.3, pulse * 0.5);
-                    quadraticVertex(pulse * 1.0, pulse * 0.2, pulse * 1.4, pulse * 0.7 + smallWingAngle);
-                    endShape();
-                    
-                    // Wing details
-                    stroke(255, 255, 255, 120);
-                    strokeWeight(2);
-                    line(-pulse * 1.8, -pulse * 0.5 + largeWingAngle, -pulse * 1.2, -pulse * 0.3);
-                    line(pulse * 1.8, -pulse * 0.5 + largeWingAngle, pulse * 1.2, -pulse * 0.3);
-                    line(-pulse * 1.2, pulse * 0.6 + smallWingAngle, -pulse * 0.8, pulse * 0.4);
-                    line(pulse * 1.2, pulse * 0.6 + smallWingAngle, pulse * 0.8, pulse * 0.4);
-                    
-                    // Body details
-                    stroke(255, 255, 255, 150);
-                    strokeWeight(3);
-                    line(-pulse * 0.4, -pulse * 0.4, pulse * 0.4, pulse * 0.4);
-                    line(pulse * 0.4, -pulse * 0.4, -pulse * 0.4, pulse * 0.4);
-                    
-                    // Energy thrusters
-                    let thrusterFlicker = Math.sin(frameCount * 0.2) * 5 + pulse * 0.3;
-                    fill(255, 99, 99, 200);
-                    noStroke();
-                    triangle(-pulse * 0.2, pulse * 0.7, pulse * 0.2, pulse * 0.7, 0, pulse * 0.7 + thrusterFlicker);
-                    
-                    // Particle effects
-                    if (frameCount % 3 === 0 && particles.length < 200) {
-                        particles.push({
-                            x: boss.x + random(-pulse * 0.3, pulse * 0.3),
-                            y: boss.y + pulse * 0.7,
-                            vx: random(-1.5, 1.5),
-                            vy: random(2, 4),
-                            size: random(3, 6),
-                            alpha: 255,
-                            color: [255, random(99, 215), random(0, 99)]
-                        });
-                        particles.push({
-                            x: boss.x + random(-pulse * 0.5, pulse * 0.5),
-                            y: boss.y,
-                            vx: random(-1, 1),
-                            vy: random(-1, 1),
-                            size: random(2, 4),
-                            alpha: 200,
-                            color: [255, 255, 255]
-                        });
-                    }
-                    
-                    drawingContext.shadowBlur = 0;
-                    strokeWeight(1);
-                    stroke(0);
-                    drawingContext.restore();
-
-                    // Draw health bar
-                    let barWidth = 60;
-                    let barHeight = 8;
-                    let healthRatio = boss.health / 200;
-                    fill(0, 255, 0);
-                    rect(boss.x - barWidth / 2, boss.y - pulse - 15, barWidth, barHeight);
-                    fill(255, 0, 0);
-                    rect(boss.x - barWidth / 2, boss.y - pulse - 15, barWidth * healthRatio, barHeight);
-                    noFill();
-                    stroke(255, 255, 255, 200);
-                    strokeWeight(1);
-                    rect(boss.x - barWidth / 2, boss.y - pulse - 15, barWidth, barHeight);
-                }
-
-                // Draw and move bullets
-                for (let i = bullets.length - 1; i >= 0; i--) {
-                    let bullet = bullets[i];
-                    if (!bullet) continue;
-                    bullet.x += bullet.speedX || 0;
-                    bullet.y += bullet.speedY;
-                    if (bullet.y < -10 || bullet.y > height + 10 || bullet.x < -10 || bullet.x > width + 10) {
-                        bullets.splice(i, 1);
-                        continue;
-                    }
-                    drawingContext.fillStyle = bulletGradient;
-                    stroke(bullet.isBossBullet ? [255, 99, 99, 80] : bullet.isExplosive ? [255, 99, 0, 80] : [255, 255, 102, 80]);
-                    strokeWeight(4);
-                    let bulletSize = bullet.isPowerBullet ? 8 : bullet.isEnemyBullet ? 10 : bullet.isExplosive ? 7 : 5;
-                    ellipse(bullet.x, bullet.y, bulletSize, bullet.isBossBullet ? 16 : bullet.isEnemyBullet ? 10 : bullet.isExplosive ? bulletSize * 1.5 : bulletSize * 2);
-                    strokeWeight(1);
-                    stroke(0);
-
-                    // Check collision with player
-                    if ((bullet.isBossBullet || bullet.isEnemyBullet) && dist(bullet.x, bullet.y, player.x, player.y) < (player.size / 2 + (bullet.isEnemyBullet ? 5 : 8))) {
-                        if (shieldActive) {
-                            shieldCount--;
-                            shieldActive = shieldCount > 0;
-                            bullets.splice(i, 1);
-                            for (let k = 0; k < 8 && particles.length < 200; k++) {
-                                particles.push({
-                                    x: bullet.x,
-                                    y: bullet.y,
-                                    vx: random(-2, 2),
-                                    vy: random(-2, 2),
-                                    size: random(2, 5),
-                                    alpha: 200,
-                                    color: [0, 204, 255]
-                                });
-                            }
-                        } else {
-                            gameOver = true;
-                            document.getElementById('gameOver').style.display = 'block';
-                            document.getElementById('pauseButton').style.display = 'none';
-                            gsap.fromTo('#gameOver', { scale: 0.7, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.8, ease: 'power3.out' });
-                            noLoop();
-                            bullets.splice(i, 1);
-                        }
-                    }
-                }
-
-                // Spawn enemies
-                if (!boss && bossCooldown <= 0 && frameCount % 8 === 0 && enemies.length < 15) {
-                    let type = random();
-                    let enemy;
-                    if (type < 0.15) {
-                        enemy = { x: random(width), y: -20, size: 15, speed: 5, type: 'small', points: 10, color: [255, 99, 99], health: 1 };
-                    } else if (type < 0.30) {
-                        enemy = { x: random(width), y: -20, size: 15, speed: 7, type: 'fast', points: 15, color: [255, 153, 51], health: 1, zigZag: random(50, 100) };
-                    } else if (type < 0.40) {
-                        enemy = { x: random(width), y: -20, size: 25, speed: 3, type: 'speedy', points: 20, color: [153, 51, 153], health: 1 };
-                    } else if (type < 0.65) {
-                        enemy = { x: random(width), y: -20, size: 35, speed: 2, type: 'large', points: 50, color: [51, 153, 255], health: 1 };
-                    } else if (type < 0.85) {
-                        enemy = { x: random(width), y: -20, size: 40, speed: 1.5, type: 'armored', points: 100, color: [150, 150, 150], health: 3 };
-                    } else if (type < 0.90) {
-                        enemy = { x: random(width), y: -20, size: speed: 20, type: speed: 4, 'stealth', points: 30, color: [255, 255, 255], health: 1, isVisible: true, visibilityTimer: 30 };
-                    } else if (type < 0.95) {
-                        enemy = { x: random(width), y: -20, size: speed: 30, type: 3, points: 40, type: 'splitter', color: [255, 204, 0], health: 2 };
-                    } else {
-                        enemy = { x: random(width), y: -20, size: speed: 35, type: speed: 2.5, type: 'shooter', points: 60, color: [200, 0, 0], health: 2, shootTimer: 60 };
-                    }
-                    enemies.push(enemy);
-                }
-
-                // Spawn power-up
-                if (!powerUp && !boss && bossCooldown <= 0 && frameCount % 150 === 0 && random() < 0.6) {
-                    powerUp = {
-                        x: random(width),
-                        y: -20,
-                        size: 20,
-                        speed: 3
-                    };
-                    }
-
-                // Spawn shield
-                if (!shield && !boss && bossCooldown <= 0 && frameCount % 240 === 0 && random() < 0.5) {
-                    shield = {
-                        x: random(width),
-                        y: -20,
-                        size: 20,
-                        speed: 3
-                    };
-                    }
-
-                // Draw and move enemies
-                for (let i = enemies.length - 1; i >= 0; i--) {
-                    let enemy = enemies[i];
-                    if (!enemy) continue;
-                    enemy.y += enemy.speed;
-                    if (enemy.type === 'fast' || enemy.type === 'splitChild') {
-                        enemy.x += Math.sin(frameCount / enemy.zigZag) * 5;
-                        enemy.x = constrain(enemy.x, enemy.size / 2, width - enemy.size / 2);
-                    }
-                    if (enemy.type === 'stealth') {
-                        enemy.visibilityTimer--;
-                        if (enemy.visibilityTimer <= 0) {
-                            enemy.isVisible = !enemy.isVisible;
-                            enemy.visibilityTimer = 30;
-                        }
-                        }
-                    if (enemy.type === 'shooter') {
-                        enemy.shootTimer--;
-                        if (enemy.shootTimer <= 0 && bullets.length < 20) {
-                            bullets.push({
-                                x: enemy.x,
-                                y: enemy.y + enemy.size / 2,
-                                speedX: (player.x - enemy.x) * 0.03,
-                                speedY: 6,
-                                isEnemyBullet: true
-                            });
-                            enemy.shootTimer = 60;
-                        }
-                    }
-                    if (enemy.y > height + enemy.size) {
-                        enemies.splice(i, 1);
-                        continue;
-                    }
-                    let pulse = Math.sin(frameCount * 0.1 + i) * (enemy.type === 'large' || enemy.type === 'armored' || enemy.type === 'shooter' || enemy.type === 'splitter' ? 5 : 3) + enemy.size;
-                    if (enemy.type !== 'stealth' || enemy.isVisible) {
-                        drawingContext.save();
-                        drawingContext.translate(enemy.x, enemy.y);
-                        drawingContext.shadowBlur = 10;
-                        drawingContext.shadowColor = `rgba(${enemy.color[0]}, ${enemy.color[1]}, ${enemy.color[2]}, 0.5)`;
-                        
-                        drawingContext.fillStyle = enemyGradients[enemy.type];
-                        stroke(enemy.color[0], enemy.color[1], enemy.color[2], 150);
-                        strokeWeight(3);
-                        
-                        if (enemy.type === 'small') {
-                            beginShape();
-                            vertex(0, -pulse * 0.6);
-                            vertex(-pulse * 0.4, pulse * 0.4);
-                            vertex(pulse * 0.4, pulse * 0.4);
-                            endShape(CLOSE);
-                            fill(255, 255, 255, 100);
-                            noStroke();
-                            ellipse(0, -pulse * 0.2, pulse * 0.3);
-                            let thrusterFlicker = Math.sin(frameCount * 0.3 + i) * 2 + 4;
-                            fill(255, 204, 102, 150);
-                            triangle(-pulse * 0.15, pulse * 0.4, pulse * 0.15, pulse * 0.4, 0, pulse * 0.4 + thrusterFlicker);
-                        } else if (enemy.type === 'fast') {
-                            beginShape();
-                            vertex(0, -pulse * 0.7);
-                            vertex(-pulse * 0.5, 0);
-                            vertex(-pulse * 0.3, pulse * 0.5);
-                            vertex(pulse * 0.3, pulse * 0.5);
-                            vertex(pulse * 0.5, 0);
-                            endShape(CLOSE);
-                            noFill();
-                            stroke(255, 255, 255, 100);
-                            strokeWeight(1);
-                            line(-pulse * 0.4, pulse * 0.2, -pulse * 0.2, pulse * 0.4);
-                            line(pulse * 0.4, pulse * 0.2, pulse * 0.2, pulse * 0.4);
-                        } else if (enemy.type === 'speedy') {
-                            ellipse(0, 0, pulse, pulse);
-                            fill(255, 255, 255, 100);
-                            noStroke();
-                            let corePulse = Math.sin(frameCount * 0.2 + i) * 2 + pulse * 0.3;
-                            ellipse(0, 0, corePulse, corePulse);
-                            noFill();
-                            stroke(enemy.color[0], enemy.color[1], enemy.color[2], 100);
-                            strokeWeight(2);
-                            ellipse(0, 0, pulse * 0.8, pulse * 0.8);
-                        } else if (enemy.type === 'large') {
-                            beginShape();
-                            vertex(0, -pulse * 0.6);
-                            vertex(-pulse * 0.6, -pulse * 0.2);
-                            vertex(-pulse * 0.7, pulse * 0.4);
-                            vertex(-pulse * 0.3, pulse * 0.6);
-                            vertex(pulse * 0.3, pulse * 0.6);
-                            vertex(pulse * 0.7, pulse * 0.4);
-                            vertex(pulse * 0.6, -pulse * 0.2);
-                            endShape(CLOSE);
-                            stroke(255, 255, 255, 100);
-                            strokeWeight(1);
-                            line(-pulse * 0.5, 0, -pulse * 0.3, pulse * 0.2);
-                            line(pulse * 0.5, 0, pulse * 0.3, pulse * 0.2);
-                        } else if (enemy.type === 'armored') {
-                            rect(-pulse * 0.5, -pulse * 0.5, pulse, pulse, 10);
-                            fill(100, 100, 100, 150);
-                            noStroke();
-                            rect(-pulse * 0.3, -pulse * 0.3, pulse * 0.6, pulse * 0.6, 5);
-                            stroke(255, 255, 255, 150);
-                            strokeWeight(2);
-                            line(-pulse * 0.4, -pulse * 0.4, pulse * 0.4, pulse * 0.4);
-                            line(-pulse * 0.4, pulse * 0.4, pulse * 0.4, -pulse * 0.4);
-                        } else if (enemy.type === 'stealth') {
-                            ellipse(0, 0, pulse, pulse);
-                            fill(255, 255, 255, 50);
-                            noStroke();
-                            ellipse(0, 0, pulse * 0.5, pulse * 0.5);
-                            noFill();
-                            stroke(255, 255, 255, 100);
-                            strokeWeight(2);
-                            let flickerPulse = Math.sin(frameCount * 0.3 + i) * 2 + pulse * 0.7;
-                            ellipse(0, 0, flickerPulse, flickerPulse);
-                        } else if (enemy.type === 'splitter') {
-                            beginShape();
-                            vertex(-pulse * 0.5, -pulse * 0.5);
-                            vertex(0, -pulse * 0.7);
-                            vertex(pulse * 0.5, -pulse * 0.5);
-                            vertex(pulse * 0.7, 0);
-                            vertex(pulse * 0.5, pulse * 0.5);
-                            vertex(0, pulse * 0.7);
-                            vertex(-pulse * 0.5, pulse * 0.5);
-                            vertex(-pulse * 0.7, 0);
-                            endShape(CLOSE);
-                            fill(255, 255, 255, 100);
-                            noStroke();
-                            ellipse(0, 0, pulse * 0.4);
-                        } else if (enemy.type === 'shooter') {
-                            beginShape();
-                            vertex(0, -pulse * 0.7);
-                            vertex(-pulse * 0.6, -pulse * 0.2);
-                            vertex(-pulse * 0.7, pulse * 0.4);
-                            vertex(0, pulse * 0.6);
-                            vertex(pulse * 0.7, pulse * 0.4);
-                            vertex(pulse * 0.6, -pulse * 0.2);
-                            endShape(CLOSE);
-                            fill(255, 99, 99, 150);
-                            noStroke();
-                            ellipse(0, pulse * 0.2, pulse * 0.3);
-                            stroke(255, 255, 255, 100);
-                            strokeWeight(1);
-                            line(-pulse * 0.5, -pulse * 0.3, pulse * 0.5, -pulse * 0.3);
-                        } else if (enemy.type === 'splitChild') {
-                            ellipse(0, 0, pulse, pulse);
-                            fill(255, 255, 255, 100);
-                            noStroke();
-                            ellipse(0, 0, pulse * 0.5);
-                            let thrusterFlicker = Math.sin(frameCount * 0.3 + i) * 1 + 3;
-                            fill(255, 204, 102, 150);
-                            triangle(-pulse * 0.2, pulse * 0.5, pulse * 0.2, pulse * 0.5, 0, pulse * 0.5 + thrusterFlicker);
-                        }
-                        
-                        drawingContext.shadowBlur = 0;
-                        strokeWeight(1);
-                        stroke(0);
-                        drawingContext.restore();
-                    }
-
-                    // Check collision with player
-                    if ((enemy.type !== 'stealth' || enemy.isVisible) && dist(enemy.x, enemy.y, player.x, player.y) < (pulse / 2 + player.size / 2)) {
-                        if (shieldActive) {
-                            shieldCount--;
-                            shieldActive = shieldCount > 0;
-                            enemies.splice(i, 1);
-                            for (let k = 0; k < 8 && particles.length < 200; k++) {
-                                particles.push({
-                                    x: enemy.x,
-                                    y: enemy.y,
-                                    vx: random(-2, 2),
-                                    vy: random(-2, 2),
-                                    size: random(2, 5),
-                                    alpha: 200,
-                                    color: [0, 204, 255]
-                                });
-                            }
-                        } else {
-                            gameOver = true;
-                            document.getElementById('gameOver').style.display = 'block';
-                            document.getElementById('pauseButton').style.display = 'none';
-                            gsap.fromTo('#gameOver', { scale: 0.7, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.8, ease: 'power3.out' });
-                            noLoop();
-                        }
-                    }
-
-                    // Check collision with bullets
-                    for (let j = bullets.length - 1; j >= 0; j--) {
-                        let bullet = bullets[j];
-                        if (!bullet || bullet.isBossBullet || bullet.isEnemyBullet) continue;
-                        if ((enemy.type !== 'stealth' || enemy.isVisible) && dist(enemy.x, enemy.y, bullet.x, bullet.y) < pulse / 2 + 7.5) {
-                            if (bullet.isExplosive) {
-                                let enemiesToRemove = [];
-                                for (let k = 0; k < enemies.length; k++) {
-                                    let nearbyEnemy = enemies[k];
-                                    if (!nearbyEnemy) continue;
-                                    if ((nearbyEnemy.type !== 'stealth' || nearbyEnemy.isVisible) && dist(bullet.x, bullet.y, nearbyEnemy.x, nearbyEnemy.y) < bullet.explosionRadius) {
-                                        nearbyEnemy.health -= bullet.isPowerBullet ? 4 : 2;
-                                        if (nearbyEnemy.health <= 0) {
-                                            enemiesToRemove.push(k);
-                                            score += nearbyEnemy.points;
-                                            document.getElementById('score').textContent = `Điểm: ${score}`;
-                                            document.getElementById('score').classList.add('update');
-                                            setTimeout(() => document.getElementById('score').classList.remove('update'), 300);
-                                        }
-                                    }
-                                }
-                                enemiesToRemove.sort((a, b) => b - a);
-                                for (let k of enemiesToRemove) {
-                                    let nearbyEnemy = enemies[k];
-                                    if (nearbyEnemy.type === 'splitter' && enemies.length <= 13) {
-                                        enemies.push({
-                                            x: nearbyEnemy.x - 15,
-                                            y: nearbyEnemy.y,
-                                            size: 15,
-                                            speed: 6,
-                                            type: 'splitChild',
-                                            points: 10,
-                                            color: [255, 204, 0],
-                                            health: 1,
-                                            zigZag: random(50, 100)
-                                        });
-                                        enemies.push({
-                                            x: nearbyEnemy.x + 15,
-                                            y: nearbyEnemy.y,
-                                            size: 15,
-                                            speed: 6,
-                                            type: 'splitChild',
-                                            points: 10,
-                                            color: [255, 204, 0],
-                                            health: 1,
-                                            zigZag: random(50, 100)
-                                        });
-                                    }
-                                    enemies.splice(k, 1);
-                                }
-                                for (let k = 0; k < 12 && particles.length < 200; k++) {
-                                    particles.push({
-                                        x: bullet.x,
-                                        y: bullet.y,
-                                        vx: random(-3, 3),
-                                        vy: random(-3, 3),
-                                        size: random(3, 7),
-                                        alpha: 255,
-                                        color: [255, 99, 0]
-                                    });
-                                }
-                                bullets.splice(j, 1);
-                            } else {
-                                enemy.health -= bullet.isPowerBullet ? 2 : 1;
-                                bullets.splice(j, 1);
-                                let particleColor = enemy.type === 'stealth' ? [255, 255, 255] : enemy.type === 'splitter' || enemy.type === 'splitChild' ? [255, 204, 0] : enemy.type === 'shooter' ? [200, 0, 0] : [255, 255, 102];
-                                for (let k = 0; k < 8 && particles.length < 200; k++) {
-                                    particles.push({
-                                        x: bullet.x,
-                                        y: bullet.y,
-                                        vx: random(-2, 2),
-                                        vy: random(-2, 2),
-                                        size: random(2, 5),
-                                        alpha: 200,
-                                        color: particleColor
-                                    });
-                                }
-                                if (enemy.health <= 0) {
-                                    if (enemy.type === 'splitter' && enemies.length <= 13) {
-                                        enemies.push({
-                                            x: enemy.x - 15,
-                                            y: enemy.y,
-                                            size: 15,
-                                            speed: 6,
-                                            type: 'splitChild',
-                                            points: 10,
-                                            color: [255, 204, 0],
-                                            health: 1,
-                                            zigZag: random(50, 100)
-                                        });
-                                        enemies.push({
-                                            x: enemy.x + 15,
-                                            y: enemy.y,
-                                            size: 15,
-                                            speed: 6,
-                                            type: 'splitChild',
-                                            points: 10,
-                                            color: [255, 204, 0],
-                                            health: 1,
-                                            zigZag: random(50, 100)
-                                        });
-                                    }
-                                    enemies.splice(i, 1);
-                                    score += enemy.points;
-                                    document.getElementById('score').textContent = `Điểm: ${score}`;
-                                    document.getElementById('score').classList.add('update');
-                                    setTimeout(() => document.getElementById('score').classList.remove('update'), 300);
-                                }
-                            }
-                            break;
-                        }
-                    }
-                }
-
-                // Check boss collision with bullets
-                if (boss) {
-                    for (let j = bullets.length - 1; j >= 0; j--) {
-                        let bullet = bullets[j];
-                        if (!bullet || bullet.isBossBullet || bullet.isEnemyBullet) continue;
-                        if (dist(boss.x, boss.y, bullet.x, bullet.y) < boss.size / 2 + 7.5) {
-                            if (bullet.isExplosive) {
-                                boss.health -= bullet.isPowerBullet ? 40 : 20;
-                                for (let k = 0; k < 12 && particles.length < 200; k++) {
-                                    particles.push({
-                                        x: bullet.x,
-                                        y: bullet.y,
-                                        vx: random(-3, 3),
-                                        vy: random(-3, 3),
-                                        size: random(3, 7),
-                                        alpha: 255,
-                                        color: [255, 99, 0]
-                                    });
-                                }
-                                bullets.splice(j, 1);
-                            } else {
-                                boss.health -= bullet.isPowerBullet ? 20 : 10;
-                                bullets.splice(j, 1);
-                                for (let k = 0; k < 8 && particles.length < 200; k++) {
-                                    particles.push({
-                                        x: bullet.x,
-                                        y: bullet.y,
-                                        vx: random(-2, 2),
-                                        vy: random(-2, 2),
-                                        size: random(2, 5),
-                                        alpha: 200,
-                                        color: [255, 255, 255]
-                                    });
-                                }
-                            }
-                            if (boss.health <= 0) {
-                                score += boss.points;
-                                document.getElementById('score').textContent = `Điểm: ${score}`;
-                                document.getElementById('score').classList.add('update');
-                                setTimeout(() => document.getElementById('score').classList.remove('update'), 300);
-                                for (let k = 0; k < 20 && particles.length < 200; k++) {
-                                    particles.push({
-                                        x: boss.x,
-                                        y: boss.y,
-                                        vx: random(-4, 4),
-                                        vy: random(-4, 4),
-                                        size: random(3, 8),
-                                        alpha: 255,
-                                        color: [255, 255, 255]
-                                    });
-                                }
-                                boss = null;
-                                powerUpActive = true;
-                                powerUpLevel = min(powerUpLevel + 1, 4);
-                                powerUpTimer += 90 * 60;
-                                bossCooldown = 600;
-                            }
-                            break;
-                        }
-                    }
-                }
-
-                // Draw and move power-up
-                if (powerUp) {
-                    powerUp.y += powerUp.speed;
-                    if (powerUp.y > height + powerUp.size) {
-                        powerUp = null;
-                    } else {
-                        let pulse = Math.sin(frameCount * 0.15) * 4 + powerUp.size;
-                        drawingContext.fillStyle = powerUpGradient;
-                        stroke(255, 215, 0, 120);
-                        strokeWeight(4);
-                        rect(powerUp.x - pulse / 2, powerUp.y - pulse / 2, pulse, pulse, 5);
-                        strokeWeight(1);
-                        stroke(0);
-
-                        // Check collision with bullets
-                        for (let j = bullets.length - 1; j >= 0; j--) {
-                            if (!powerUp) break;
-                            let bullet = bullets[j];
-                            if (!bullet || bullet.isBossBullet || bullet.isEnemyBullet) continue;
-                            if (dist(powerUp.x, powerUp.y, bullet.x, bullet.y) < pulse / 2 + 7.5) {
-                                powerUp = null;
-                                bullets.splice(j, 1);
-                                powerUpActive = true;
-                                powerUpLevel = min(powerUpLevel + 1, 4);
-                                powerUpTimer += 90 * 60;
-                                document.getElementById('powerUpTimer').style.display = 'block';
-                                for (let k = 0; k < 8 && particles.length < 200; k++) {
-                                    particles.push({
-                                        x: bullet.x,
-                                        y: bullet.y,
-                                        vx: random(-2, 2),
-                                        vy: random(-2, 2),
-                                        size: random(2, 5),
-                                        alpha: 200,
-                                        color: [255, 215, 0]
-                                    });
-                                }
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                // Draw and move shield
-                if (shield) {
-                    shield.y += shield.speed;
-                    if (shield.y > height + shield.size) {
-                        shield = null;
-                    } else {
-                        let pulse = Math.sin(frameCount * 0.15) * 4 + shield.size;
-                        drawingContext.fillStyle = shieldGradient;
-                        stroke(0, 204, 255, 120);
-                        strokeWeight(4);
-                        ellipse(shield.x, shield.y, pulse, pulse);
-                        strokeWeight(1);
-                        stroke(0);
-
-                        // Check collision with bullets
-                        for (let j = bullets.length - 1; j >= 0; j--) {
-                            if (!shield) break;
-                            let bullet = bullets[j];
-                            if (!bullet || bullet.isBossBullet || bullet.isEnemyBullet) continue;
-                            if (dist(shield.x, shield.y, bullet.x, bullet.y) < pulse / 2 + 7.5) {
-                                shield = null;
-                                bullets.splice(j, 1);
-                                shieldCount++;
-                                shieldActive = true;
-                                document.getElementById('shieldStatus').style.display = 'block';
-                                for (let k = 0; k < 8 && particles.length < 200; k++) {
-                                    particles.push({
-                                        x: bullet.x,
-                                        y: bullet.y,
-                                        vx: random(-2, 2),
-                                        vy: random(-2, 2),
-                                        size: random(2, 5),
-                                        alpha: 200,
-                                        color: [0, 204, 255]
-                                    });
-                                }
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                // Draw particles
-                for (let i = particles.length - 1; i >= 0; i--) {
-                    let particle = particles[i];
-                    if (!particle) continue;
-                    particle.x += particle.vx;
-                    particle.y += particle.vy;
-                    particle.alpha -= 6;
-                    if (particle.alpha <= 0) {
-                        particles.splice(i, 1);
-                        continue;
-                    }
-                    fill(particle.color[0], particle.color[1], particle.color[2], particle.alpha);
-                    noStroke();
-                    ellipse(particle.x, particle.y, particle.size);
-                }
-
-                // Game over effect
-                if (gameOver) {
-                    fill(255, 99, 99, 120);
-                    rect(0, 0, width, height);
-                }
-            }
-        }
-
-        function keyPressed() {
-            if (key === 'r' && (gameOver || gameWon)) {
-                gsap.to('#gameOver, #winScreen', {
-                    opacity: 0,
-                    scale: 0.7,
-                    duration: 0.6,
-                    ease: 'power3.in',
-                    onComplete: () => {
-                        resetGame();
-                        document.getElementById('startScreen').style.display = 'block';
-                        document.getElementById('playerNameInput').focus();
-                        loop();
-                    }
-                });
-            } else if (key === 'p' && gameStarted && !gameOver && !gameWon && !showUpgradeMenu) {
-                togglePause();
-            } else if (key === 'u' && gameStarted && !gameOver && !gameWon && !isPaused) {
-                toggleUpgradeMenu();
-            } else if (showUpgradeMenu) {
-                if (key === '1' && upgrades.speedLevel < 3) {
-                    let cost = (upgrades.speedLevel + 1) * 100;
-                    if (score >= cost) {
-                        score -= cost;
-                        upgrades.speedLevel++;
-                        document.getElementById('score').textContent = `Điểm: ${score}`;
-                        updateUpgradeOptions();
-                    }
-                } else if (key === '2' && upgrades.fireRateLevel < 3) {
-                    let cost = (upgrades.fireRateLevel + 1) * 150;
-                    if (score >= cost) {
-                        score -= cost;
-                        upgrades.fireRateLevel++;
-                        document.getElementById('score').textContent = `Điểm: ${score}`;
-                }
-            }
-        }
-    </script>
+    // Hiệu ứng fade-in cho các phần tử
+    document.querySelectorAll('.fade-in').forEach((el, index) => {
+      el.style.animationDelay = `${index * 0.2}s`;
+    });
+  </script>
 </body>
 </html>
