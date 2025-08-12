@@ -9,18 +9,17 @@
         height: 100vh;
         display: flex;
         flex-direction: column;
-        background: linear-gradient(135deg, #141e30, #243b55);
-        font-family: 'Segoe UI', sans-serif;
+        background: linear-gradient(135deg, #1e1e2f, #2a2a40);
         color: white;
+        font-family: 'Segoe UI', sans-serif;
+        overflow: hidden;
     }
     .navbar {
         display: flex;
         align-items: center;
-        padding: 10px;
-        background: rgba(0,0,0,0.4);
+        padding: 8px;
+        background: rgba(0,0,0,0.3);
         gap: 8px;
-        backdrop-filter: blur(8px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.5);
     }
     .navbar button {
         background: rgba(255,255,255,0.1);
@@ -28,47 +27,59 @@
         color: white;
         font-size: 18px;
         cursor: pointer;
-        padding: 6px 10px;
-        border-radius: 6px;
+        padding: 8px 10px;
+        border-radius: 8px;
         transition: background 0.3s;
     }
     .navbar button:hover {
-        background: rgba(255,255,255,0.25);
+        background: rgba(255,255,255,0.2);
     }
     .navbar input {
         flex: 1;
-        padding: 8px;
+        padding: 10px 15px;
         border: none;
-        border-radius: 6px;
+        border-radius: 50px;
         outline: none;
         font-size: 14px;
-    }
-    .history {
-        background: rgba(255,255,255,0.05);
-        padding: 8px;
-        max-height: 120px;
-        overflow-y: auto;
-        font-size: 13px;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-    .history-item {
-        padding: 4px;
-        cursor: pointer;
-        border-radius: 4px;
-        transition: background 0.2s;
-    }
-    .history-item:hover {
-        background: rgba(255,255,255,0.15);
-    }
-    .clear-btn {
-        background: crimson;
+        background: rgba(255,255,255,0.1);
         color: white;
-        border: none;
-        padding: 5px 10px;
-        font-size: 12px;
-        border-radius: 4px;
+    }
+    .history-panel {
+        position: absolute;
+        left: 0;
+        top: 48px;
+        width: 250px;
+        max-height: 0;
+        overflow: hidden;
+        background: rgba(0,0,0,0.4);
+        backdrop-filter: blur(6px);
+        transition: max-height 0.4s ease;
+        border-right: 1px solid rgba(255,255,255,0.2);
+    }
+    .history-panel.open {
+        max-height: 300px;
+    }
+    .history-panel h3 {
+        margin: 10px;
+        font-size: 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.2);
+        padding-bottom: 5px;
+    }
+    .history-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    .history-list li {
+        padding: 6px 12px;
         cursor: pointer;
-        float: right;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .history-list li:hover {
+        background: rgba(255,255,255,0.1);
     }
     iframe {
         flex: 1;
@@ -84,12 +95,13 @@
     <button onclick="goForward()">➡</button>
     <button onclick="reloadPage()">🔄</button>
     <input type="text" id="urlInput" placeholder="Nhập URL và nhấn Enter..." onkeydown="if(event.key==='Enter'){loadURL();}">
+    <button onclick="toggleHistory()">📜</button>
+    <button onclick="toggleMute()" id="muteBtn">🔊</button>
 </div>
 
-<div class="history">
-    <b>Lịch sử</b>
-    <button class="clear-btn" onclick="clearHistory()">Xóa</button>
-    <div id="historyList"></div>
+<div class="history-panel" id="historyPanel">
+    <h3>Lịch sử <button style="float:right;" onclick="clearHistory()">🗑</button></h3>
+    <ul class="history-list" id="historyList"></ul>
 </div>
 
 <iframe id="viewer"></iframe>
@@ -97,34 +109,31 @@
 <script>
 let historyStack = [];
 let currentIndex = -1;
+let isMuted = false;
 
-function loadURL(urlFromHistory = null) {
-    const url = urlFromHistory || document.getElementById('urlInput').value.trim();
+function loadURL(url) {
+    if (!url) url = document.getElementById('urlInput').value.trim();
     if (!url) return;
     const fullURL = url.startsWith('http') ? url : 'https://' + url;
     document.getElementById('viewer').src = fullURL;
-    if (!urlFromHistory) {
-        historyStack = historyStack.slice(0, currentIndex + 1);
-        historyStack.push(fullURL);
-        currentIndex++;
-        updateHistoryUI();
-    }
     document.getElementById('urlInput').value = fullURL;
+    historyStack = historyStack.slice(0, currentIndex + 1);
+    historyStack.push(fullURL);
+    currentIndex++;
+    updateHistoryUI();
 }
 
 function goBack() {
     if (currentIndex > 0) {
         currentIndex--;
-        document.getElementById('viewer').src = historyStack[currentIndex];
-        document.getElementById('urlInput').value = historyStack[currentIndex];
+        loadWithoutPush(historyStack[currentIndex]);
     }
 }
 
 function goForward() {
     if (currentIndex < historyStack.length - 1) {
         currentIndex++;
-        document.getElementById('viewer').src = historyStack[currentIndex];
-        document.getElementById('urlInput').value = historyStack[currentIndex];
+        loadWithoutPush(historyStack[currentIndex]);
     }
 }
 
@@ -134,25 +143,40 @@ function reloadPage() {
     }
 }
 
+function loadWithoutPush(url) {
+    document.getElementById('viewer').src = url;
+    document.getElementById('urlInput').value = url;
+}
+
+function toggleHistory() {
+    document.getElementById('historyPanel').classList.toggle('open');
+}
+
 function updateHistoryUI() {
     const list = document.getElementById('historyList');
     list.innerHTML = '';
-    historyStack.forEach((item, index) => {
-        const div = document.createElement('div');
-        div.className = 'history-item';
-        div.textContent = item;
-        div.onclick = () => {
-            currentIndex = index;
-            loadURL(item);
+    historyStack.forEach((link, i) => {
+        const li = document.createElement('li');
+        li.textContent = link;
+        li.onclick = () => {
+            currentIndex = i;
+            loadWithoutPush(link);
         };
-        list.appendChild(div);
+        list.appendChild(li);
     });
 }
 
 function clearHistory() {
     historyStack = [];
     currentIndex = -1;
-    document.getElementById('historyList').innerHTML = '';
+    updateHistoryUI();
+}
+
+function toggleMute() {
+    isMuted = !isMuted;
+    document.getElementById('muteBtn').textContent = isMuted ? "🔇" : "🔊";
+    const iframe = document.getElementById('viewer');
+    iframe.contentWindow.postMessage({action: 'mute', muted: isMuted}, '*');
 }
 </script>
 
