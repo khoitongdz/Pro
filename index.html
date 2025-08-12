@@ -1,1 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Web Console Runner</title>
+<style>
+    body {
+        margin: 0;
+        background: #1e1e2f;
+        color: white;
+        font-family: Arial, sans-serif;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+    header {
+        display: flex;
+        align-items: center;
+        background: #2b2b3c;
+        padding: 8px;
+        gap: 8px;
+    }
+    button {
+        background: #3a3a4d;
+        border: none;
+        color: white;
+        padding: 5px 10px;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+    button:hover {
+        background: #50506a;
+    }
+    input {
+        flex: 1;
+        padding: 5px;
+        border: none;
+        border-radius: 5px;
+        background: #1e1e2f;
+        color: white;
+    }
+    main {
+        flex: 1;
+        display: flex;
+    }
+    iframe {
+        flex: 2;
+        border: none;
+        background: white;
+    }
+    .console-panel {
+        flex: 1;
+        background: #1b1b2b;
+        display: flex;
+        flex-direction: column;
+        padding: 10px;
+    }
+    textarea {
+        flex: 1;
+        resize: none;
+        background: #0e0e18;
+        color: #00ff99;
+        border: none;
+        border-radius: 5px;
+        padding: 10px;
+        font-family: monospace;
+    }
+    .output {
+        flex: 1;
+        background: black;
+        color: #0f0;
+        padding: 10px;
+        font-family: monospace;
+        overflow-y: auto;
+        border-radius: 5px;
+        margin-top: 5px;
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <button onclick="goBack()">⬅</button>
+    <button onclick="goForward()">➡</button>
+    <button onclick="reloadFrame()">🔄</button>
+    <input id="urlInput" type="text" placeholder="Nhập URL..." value="https://example.com">
+    <button onclick="loadURL()">Go</button>
+</header>
+
+<main>
+    <iframe id="webFrame" src="https://example.com"></iframe>
+    <div class="console-panel">
+        <textarea id="jsCode" placeholder="Nhập code JavaScript..."></textarea>
+        <button onclick="runCode()">Chạy Code</button>
+        <div class="output" id="consoleOutput"></div>
+    </div>
+</main>
+
+<script>
+    const frame = document.getElementById("webFrame");
+    const historyStack = [];
+    let currentIndex = -1;
+
+    function loadURL() {
+        const url = document.getElementById("urlInput").value;
+        frame.src = url;
+        if (currentIndex < historyStack.length - 1) {
+            historyStack.splice(currentIndex + 1);
+        }
+        historyStack.push(url);
+        currentIndex++;
+    }
+
+    function goBack() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            frame.src = historyStack[currentIndex];
+            document.getElementById("urlInput").value = historyStack[currentIndex];
+        }
+    }
+
+    function goForward() {
+        if (currentIndex < historyStack.length - 1) {
+            currentIndex++;
+            frame.src = historyStack[currentIndex];
+            document.getElementById("urlInput").value = historyStack[currentIndex];
+        }
+    }
+
+    function reloadFrame() {
+        frame.src = frame.src;
+    }
+
+    function runCode() {
+        const code = document.getElementById("jsCode").value;
+        const output = document.getElementById("consoleOutput");
+        try {
+            let result = eval(code);
+            if (result instanceof Promise) {
+                result.then(res => output.innerHTML += "\n" + res);
+            } else {
+                output.innerHTML += "\n" + result;
+            }
+        } catch (err) {
+            output.innerHTML += "\nError: " + err;
+        }
+    }
+</script>
+
+</body>
+</html>
 
