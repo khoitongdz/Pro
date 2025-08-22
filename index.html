@@ -2,133 +2,197 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Cloud Phone Free</title>
+  <title>Cloud Phone Pro</title>
   <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrious/dist/qrious.min.js"></script>
   <style>
-    body {
-      margin:0; font-family:Segoe UI, sans-serif; background:#0f172a; color:white;
-      display:flex; height:100vh; justify-content:center; align-items:center;
-    }
-    .app {
-      width:90%; max-width:1200px; height:90%; display:flex; gap:16px;
-    }
-    .videoArea {
-      flex:3; background:#000; border-radius:16px; overflow:hidden;
-      display:flex; justify-content:center; align-items:center;
-      position:relative;
-    }
+    body { margin:0; font-family:Segoe UI, sans-serif; background:#0f172a; color:white; display:flex; height:100vh; justify-content:center; align-items:center; }
+    .app { width:95%; max-width:1400px; height:95%; display:grid; grid-template-columns:3fr 1fr; gap:16px; }
+    .videoArea { background:#000; border-radius:16px; overflow:hidden; position:relative; display:flex; justify-content:center; align-items:center; flex-direction:column; }
     video { width:100%; height:100%; object-fit:cover; }
-    .sidebar {
-      flex:1; background:#1e293b; border-radius:16px; padding:16px; display:flex; flex-direction:column;
-    }
-    .roomBox { margin-bottom:16px; }
-    input, button {
-      padding:10px; border:none; border-radius:8px; font-size:14px;
-    }
+    .usernameTag { position:absolute; bottom:10px; left:10px; background:rgba(0,0,0,.6); padding:6px 10px; border-radius:8px; font-size:14px; display:flex; align-items:center; gap:6px; }
+    .usernameTag img { width:24px; height:24px; border-radius:50%; }
+    .sidebar { background:#1e293b; border-radius:16px; padding:16px; display:flex; flex-direction:column; }
+    .roomBox { margin-bottom:12px; display:flex; gap:8px; }
+    input, button { padding:10px; border:none; border-radius:8px; font-size:14px; }
     input { flex:1; }
-    button {
-      background:linear-gradient(135deg,#3b82f6,#06b6d4);
-      color:white; cursor:pointer; font-weight:600; transition:.2s;
-    }
+    button { background:linear-gradient(135deg,#3b82f6,#06b6d4); color:white; cursor:pointer; font-weight:600; transition:.2s; }
     button:hover { opacity:.85; }
-    .chatBox {
-      flex:1; background:#0f172a; border-radius:12px; padding:10px; overflow-y:auto; margin:10px 0;
-    }
-    .msg { margin:4px 0; }
-    .me { color:#3b82f6; }
-    .peer { color:#06b6d4; }
-    .controls { display:flex; gap:8px; }
+    .status { font-size:13px; margin:6px 0; color:#94a3b8; }
+    .chatBox { flex:1; background:#0f172a; border-radius:12px; padding:10px; overflow-y:auto; margin:10px 0; display:flex; flex-direction:column; gap:6px; }
+    .msg { display:flex; gap:8px; align-items:flex-start; }
+    .msg img { width:28px; height:28px; border-radius:50%; }
+    .bubble { max-width:70%; padding:8px 12px; border-radius:12px; }
+    .me .bubble { background:#3b82f6; align-self:flex-end; }
+    .peer .bubble { background:#06b6d4; }
+    .controls { display:flex; gap:8px; margin-bottom:8px; }
+    .quickControls { display:flex; gap:8px; margin-top:8px; }
+    canvas { margin-top:10px; }
   </style>
 </head>
 <body>
 <div class="app">
   <div class="videoArea">
     <video id="remoteVideo" autoplay playsinline></video>
+    <div class="usernameTag" id="remoteUser" style="display:none;">
+      <img id="remoteAvatar"/><span id="remoteName"></span>
+    </div>
   </div>
   <div class="sidebar">
+    <div class="roomBox">
+      <input id="username" placeholder="Tên hiển thị"/>
+    </div>
     <div class="roomBox">
       <button onclick="createRoom()">Tạo phòng</button>
       <input id="roomId" placeholder="Nhập Room ID"/>
       <button onclick="joinRoom()">Join</button>
     </div>
-    <div id="roomInfo"></div>
+    <div class="status" id="roomInfo">Chưa vào phòng</div>
+    <canvas id="qrcode"></canvas>
+
     <div class="chatBox" id="chat"></div>
     <div class="controls">
       <input id="msg" placeholder="Nhập tin nhắn..."/>
       <button onclick="sendMsg()">Gửi</button>
     </div>
     <button onclick="shareScreen()">📺 Share Screen</button>
+    <div class="quickControls">
+      <button onclick="toggleMic()">🎤 Mic</button>
+      <button onclick="toggleCam()">📷 Cam</button>
+      <button onclick="leaveRoom()">🚪 Thoát</button>
+    </div>
+    <div class="status" id="stats"></div>
   </div>
 </div>
 
 <script>
 let peer, conn, call, myStream;
 let isHost = false;
+let currentRoom = "";
+let micEnabled = true, camEnabled = true;
+let myName="", myAvatar="";
 
-function createRoom(){
-  const id = "room-" + Math.random().toString(36).substring(2,8);
-  document.getElementById("roomId").value = id;
-  document.getElementById("roomInfo").innerHTML = "Bạn là Host<br>ID phòng: <b>"+id+"</b>";
-  isHost = true;
-  startPeer(id);
+function getAvatar(name){
+  return `https://avatars.dicebear.com/api/identicon/${encodeURIComponent(name)}.svg`;
 }
 
+function createRoom(){
+  myName = document.getElementById("username").value || "Host";
+  myAvatar = getAvatar(myName);
+  const id = "room-" + Math.random().toString(36).substring(2,8);
+  document.getElementById("roomId").value = id;
+  document.getElementById("roomInfo").innerHTML = "Bạn là Host<br>ID: <b>"+id+"</b>";
+  genQR(id);
+  isHost = true; currentRoom = id;
+  startPeer(id);
+}
 function joinRoom(){
+  myName = document.getElementById("username").value || "Guest";
+  myAvatar = getAvatar(myName);
   const id = document.getElementById("roomId").value.trim();
   if(!id) return alert("Nhập Room ID");
   document.getElementById("roomInfo").innerHTML = "Bạn join phòng: <b>"+id+"</b>";
-  isHost = false;
+  genQR(id);
+  isHost = false; currentRoom = id;
   startPeer("guest-" + Math.random().toString(36).substring(2,8), id);
+}
+function genQR(text){
+  new QRious({ element: document.getElementById("qrcode"), value: location.href.split('#')[0]+"#"+text, size:120 });
 }
 
 async function startPeer(myId, connectTo){
   peer = new Peer(myId, { host: 'peerjs.com', secure:true, port:443 });
 
   peer.on("open", async ()=>{
-    console.log("Peer ready:", myId);
     myStream = await navigator.mediaDevices.getUserMedia({video:true, audio:true});
-
     if(isHost){
       peer.on("connection", c=>{
         conn = c;
-        conn.on("data", d=> logChat(d, "peer"));
+        conn.on("data", d=> handleData(d,"peer"));
+        conn.send({type:"info", name:myName, avatar:myAvatar});
       });
       peer.on("call", c=>{
         c.answer(myStream);
-        c.on("stream", s=> document.getElementById("remoteVideo").srcObject = s);
+        c.on("stream", s=> setRemoteVideo(s));
+        call = c;
+        monitorStats(call.peerConnection);
       });
     } else {
       conn = peer.connect(connectTo);
-      conn.on("data", d=> logChat(d, "peer"));
+      conn.on("open", ()=> conn.send({type:"info", name:myName, avatar:myAvatar}));
+      conn.on("data", d=> handleData(d,"peer"));
       call = peer.call(connectTo, myStream);
-      call.on("stream", s=> document.getElementById("remoteVideo").srcObject = s);
+      call.on("stream", s=> setRemoteVideo(s));
+      monitorStats(call.peerConnection);
     }
   });
+}
+
+function handleData(data, who){
+  if(data.type==="chat"){
+    logChat(data.msg, data.name, data.avatar, who);
+  } else if(data.type==="info"){
+    document.getElementById("remoteUser").style.display="flex";
+    document.getElementById("remoteName").textContent = data.name;
+    document.getElementById("remoteAvatar").src = data.avatar;
+  }
 }
 
 function sendMsg(){
   const msg = document.getElementById("msg").value;
   if(conn && conn.open){
-    conn.send(msg);
-    logChat(msg, "me");
+    conn.send({type:"chat", msg, name:myName, avatar:myAvatar});
+    logChat(msg,myName,myAvatar,"me");
   }
   document.getElementById("msg").value="";
 }
-
-function logChat(msg, who){
+function logChat(msg, name, avatar, who){
   let div=document.createElement("div");
   div.className="msg "+who;
-  div.textContent=(who==="me"?"Bạn: ":"Người kia: ")+msg;
+  div.innerHTML = `<img src="${avatar}"><div class="bubble"><b>${name}:</b> ${msg}</div>`;
   document.getElementById("chat").appendChild(div);
   document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
 }
-
+function setRemoteVideo(stream){
+  document.getElementById("remoteVideo").srcObject = stream;
+}
 async function shareScreen(){
   let screen = await navigator.mediaDevices.getDisplayMedia({video:true});
   if(call){
     let sender = call.peerConnection.getSenders().find(s=>s.track.kind==="video");
     sender.replaceTrack(screen.getTracks()[0]);
   }
+}
+function toggleMic(){
+  micEnabled = !micEnabled;
+  myStream.getAudioTracks().forEach(t=> t.enabled = micEnabled);
+}
+function toggleCam(){
+  camEnabled = !camEnabled;
+  myStream.getVideoTracks().forEach(t=> t.enabled = camEnabled);
+}
+function leaveRoom(){
+  if(call) call.close();
+  if(conn) conn.close();
+  document.getElementById("roomInfo").innerHTML = "Đã thoát phòng";
+  document.getElementById("chat").innerHTML="";
+  document.getElementById("qrcode").getContext("2d").clearRect(0,0,120,120);
+  document.getElementById("remoteUser").style.display="none";
+}
+function monitorStats(pc){
+  setInterval(async ()=>{
+    let stats = await pc.getStats();
+    let out="";
+    stats.forEach(r=>{
+      if(r.type==="outbound-rtp" && r.kind==="video"){
+        out += `FPS: ${r.framesPerSecond||0} `;
+      }
+      if(r.type==="candidate-pair" && r.currentRoundTripTime){
+        out += `Ping: ${(r.currentRoundTripTime*1000).toFixed(0)}ms`;
+      }
+    });
+    document.getElementById("stats").innerText = out;
+  },2000);
 }
 </script>
 </body>
