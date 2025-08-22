@@ -1,368 +1,126 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Cloud Phone Free – WebRTC + Firebase</title>
-  <!-- TailwindCSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <title>Cloud Room Demo</title>
   <style>
-    video { aspect-ratio: 16/9; }
-    .btn { @apply px-4 py-2 rounded-2xl shadow font-medium transition active:scale-[.98]; }
-    .btn-primary { @apply bg-indigo-600 text-white hover:bg-indigo-700; }
-    .btn-ghost { @apply bg-white/70 hover:bg-white text-gray-700 border border-gray-200; }
-    .badge { @apply text-xs px-2 py-0.5 rounded-full bg-gray-100; }
+    body { margin:0; display:flex; height:100vh; background:#111; color:white; font-family:sans-serif; }
+    #videoContainer { flex:3; display:flex; justify-content:center; align-items:center; background:#000; }
+    video { width:100%; height:100%; object-fit:cover; }
+    #sidebar { flex:1; background:#1c1c1c; display:flex; flex-direction:column; }
+    #chat { flex:1; overflow-y:auto; padding:10px; }
+    #inputBox { display:flex; }
+    #inputBox input { flex:1; padding:8px; }
+    #inputBox button { padding:8px; }
   </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100">
-  <div class="max-w-6xl mx-auto p-4 sm:p-8">
-    <header class="mb-6 flex items-center justify-between">
-      <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Cloud Phone (Free) <span class="badge">WebRTC + Firebase</span></h1>
-      <a href="#howto" class="text-xs sm:text-sm underline opacity-80 hover:opacity-100">Hướng dẫn</a>
-    </header>
-
-    <div class="grid lg:grid-cols-3 gap-6">
-      <!-- Left: Call Controls -->
-      <section class="lg:col-span-1 space-y-4">
-        <div class="bg-white/5 backdrop-blur rounded-2xl p-4 shadow-lg border border-white/10">
-          <h2 class="font-semibold mb-3">Kết nối</h2>
-          <label class="block text-sm mb-1">Room ID</label>
-          <div class="flex gap-2">
-            <input id="roomId" class="w-full rounded-xl bg-white/10 border border-white/20 px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500" placeholder="vd: my-room-123" />
-            <button id="genId" class="btn btn-ghost">Tạo ID</button>
-          </div>
-
-          <div class="mt-3 flex flex-wrap gap-2">
-            <button id="createBtn" class="btn btn-primary">Create room</button>
-            <button id="joinBtn" class="btn btn-ghost">Join room</button>
-            <button id="hangupBtn" class="btn btn-ghost hidden">Hang up</button>
-          </div>
-
-          <div class="mt-3 text-xs text-slate-300 leading-relaxed">
-            <p><strong>Free API:</strong> dùng Firebase Realtime Database (gói miễn phí). Không cần server riêng. Dùng STUN Google; TURN là tuỳ chọn (nên thêm nếu NAT khó).</p>
-          </div>
-        </div>
-
-        <div class="bg-white/5 backdrop-blur rounded-2xl p-4 shadow-lg border border-white/10 space-y-3">
-          <h2 class="font-semibold">Thiết bị</h2>
-          <div class="space-y-2">
-            <label class="block text-sm">Mic</label>
-            <select id="audioIn" class="w-full rounded-xl bg-white/10 border border-white/20 px-3 py-2"></select>
-            <label class="block text-sm mt-2">Camera</label>
-            <select id="videoIn" class="w-full rounded-xl bg-white/10 border border-white/20 px-3 py-2"></select>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <button id="toggleMic" class="btn btn-ghost">Mute Mic</button>
-            <button id="toggleCam" class="btn btn-ghost">Turn Off Cam</button>
-            <button id="switchCam" class="btn btn-ghost">Switch Camera</button>
-          </div>
-        </div>
-
-        <div class="bg-white/5 backdrop-blur rounded-2xl p-4 shadow-lg border border-white/10">
-          <h2 class="font-semibold mb-2">Cấu hình (tuỳ chọn)</h2>
-          <label class="block text-xs opacity-80 mb-1">TURN server (nếu có)</label>
-          <input id="turnUrl" class="w-full rounded-xl bg-white/10 border border-white/20 px-3 py-2 mb-2" placeholder="turn:example.com:3478" />
-          <div class="grid grid-cols-2 gap-2">
-            <input id="turnUser" class="rounded-xl bg-white/10 border border-white/20 px-3 py-2" placeholder="TURN username" />
-            <input id="turnPass" class="rounded-xl bg-white/10 border border-white/20 px-3 py-2" placeholder="TURN password" />
-          </div>
-        </div>
-      </section>
-
-      <!-- Right: Videos -->
-      <section class="lg:col-span-2 space-y-4">
-        <div class="grid sm:grid-cols-2 gap-4">
-          <div class="bg-black/40 rounded-2xl border border-white/10 overflow-hidden relative">
-            <div class="absolute z-10 left-2 top-2 text-xs bg-white/10 rounded px-2 py-1">You</div>
-            <video id="localVideo" autoplay playsinline muted class="w-full h-full object-cover"></video>
-          </div>
-          <div class="bg-black/40 rounded-2xl border border-white/10 overflow-hidden relative">
-            <div class="absolute z-10 left-2 top-2 text-xs bg-white/10 rounded px-2 py-1">Remote</div>
-            <video id="remoteVideo" autoplay playsinline class="w-full h-full object-cover"></video>
-          </div>
-        </div>
-
-        <div class="bg-white/5 backdrop-blur rounded-2xl p-4 shadow-lg border border-white/10 text-sm">
-          <div class="flex items-center gap-2"><span class="badge">Trạng thái</span><span id="status">Idle</span></div>
-          <div class="mt-2 grid sm:grid-cols-3 gap-2 text-xs opacity-90">
-            <div>ICE: <span id="iceState">-</span></div>
-            <div>DTLS: <span id="dtlsState">-</span></div>
-            <div>PC: <span id="pcState">-</span></div>
-          </div>
-        </div>
-      </section>
+<body>
+  <div id="videoContainer">
+    <video id="remoteVideo" autoplay playsinline></video>
+  </div>
+  <div id="sidebar">
+    <h3>Room</h3>
+    <input id="roomId" placeholder="Nhập Room ID"/>
+    <button onclick="joinRoom()">Join</button>
+    <button onclick="shareScreen()">Share Screen</button>
+    <div id="chat"></div>
+    <div id="inputBox">
+      <input id="msg" placeholder="Chat..."/>
+      <button onclick="sendMsg()">Gửi</button>
     </div>
-
-    <section id="howto" class="mt-10 bg-white/5 backdrop-blur rounded-2xl p-4 shadow-lg border border-white/10 text-sm leading-relaxed">
-      <h2 class="font-semibold text-lg mb-2">Cách dùng (100% Free)</h2>
-      <ol class="list-decimal pl-5 space-y-1">
-        <li>Tạo project <strong>Firebase</strong> (gói Spark free) → bật <em>Realtime Database</em> (mode test) → copy <em>firebaseConfig</em>.</li>
-        <li>Mở file này → thay <code>FIREBASE_CONFIG_HERE</code> ở phần script bằng config của bạn.</li>
-        <li>Mở file trên 2 máy/2 trình duyệt. Máy A: nhập Room ID → bấm <strong>Create room</strong>. Máy B: nhập đúng Room ID → <strong>Join room</strong>.</li>
-        <li>Nếu NAT khó nối, thêm TURN server (tuỳ chọn). Nếu không có, vẫn chạy P2P qua STUN (thành công tuỳ mạng).</li>
-      </ol>
-      <p class="mt-2 opacity-80">Ghi chú: Đây là demo 1-1 video call ("cloud phone") dùng WebRTC + Firebase làm signaling miễn phí. Không thu dữ liệu, không server riêng.</p>
-    </section>
   </div>
 
-  <!-- Firebase (compat) -->
-  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+<script>
+// TODO: Dán firebaseConfig của bạn vào đây
+const firebaseConfig = {
+  apiKey: "xxx",
+  authDomain: "xxx",
+  databaseURL: "xxx",
+  projectId: "xxx",
+  storageBucket: "xxx",
+  messagingSenderId: "xxx",
+  appId: "xxx"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-  <script>
-    // === 1) Firebase config – Thay bằng config dự án của bạn (Free tier) ===
-    const firebaseConfig = {
-      // ⚠️ TODO: Dán config của bạn từ Firebase console vào đây
-      // apiKey: "...",
-      // authDomain: "...",
-      // databaseURL: "...",
-      // projectId: "...",
-      // storageBucket: "...",
-      // messagingSenderId: "...",
-      // appId: "...",
+let pc, dc, roomRef;
+const servers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+
+function logChat(msg, who="system") {
+  let div = document.createElement("div");
+  div.textContent = who + ": " + msg;
+  document.getElementById("chat").appendChild(div);
+}
+
+async function joinRoom(){
+  const roomId = document.getElementById("roomId").value;
+  if(!roomId) return alert("Nhập Room ID");
+  roomRef = db.ref("rooms/" + roomId);
+
+  pc = new RTCPeerConnection(servers);
+  dc = pc.createDataChannel("chat");
+  dc.onmessage = e => logChat(e.data, "peer");
+
+  pc.ondatachannel = e => {
+    e.channel.onmessage = ev => logChat(ev.data, "peer");
+  };
+
+  pc.ontrack = e => {
+    document.getElementById("remoteVideo").srcObject = e.streams[0];
+  };
+
+  let stream = await navigator.mediaDevices.getUserMedia({ video:true, audio:true });
+  stream.getTracks().forEach(track => pc.addTrack(track, stream));
+
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+
+  let snap = await roomRef.once("value");
+  if(!snap.exists()){
+    await roomRef.set({ offer: offer });
+    pc.onicecandidate = e => {
+      if(e.candidate) roomRef.child("callerCandidates").push(e.candidate.toJSON());
     };
-
-    // Chặn quên cấu hình
-    function assertFirebaseConfig(cfg){
-      const keys = ["apiKey","authDomain","databaseURL","projectId","appId"];
-      const ok = keys.every(k => cfg && typeof cfg[k] === 'string' && cfg[k].length > 0);
-      if(!ok){
-        console.warn("⚠️ Bạn chưa điền firebaseConfig. Ứng dụng sẽ chỉ cho phép xem trước camera.");
-      }
-    }
-    assertFirebaseConfig(firebaseConfig);
-
-    let app, db;
-    try { app = firebase.initializeApp(firebaseConfig); db = firebase.database(); } catch(e) { console.warn(e); }
-
-    // === 2) DOM ===
-    const els = {
-      roomId: document.getElementById('roomId'),
-      genId: document.getElementById('genId'),
-      createBtn: document.getElementById('createBtn'),
-      joinBtn: document.getElementById('joinBtn'),
-      hangupBtn: document.getElementById('hangupBtn'),
-      localVideo: document.getElementById('localVideo'),
-      remoteVideo: document.getElementById('remoteVideo'),
-      status: document.getElementById('status'),
-      iceState: document.getElementById('iceState'),
-      dtlsState: document.getElementById('dtlsState'),
-      pcState: document.getElementById('pcState'),
-      audioIn: document.getElementById('audioIn'),
-      videoIn: document.getElementById('videoIn'),
-      toggleMic: document.getElementById('toggleMic'),
-      toggleCam: document.getElementById('toggleCam'),
-      switchCam: document.getElementById('switchCam'),
-      turnUrl: document.getElementById('turnUrl'),
-      turnUser: document.getElementById('turnUser'),
-      turnPass: document.getElementById('turnPass'),
+    roomRef.child("answer").on("value", async s=>{
+      if(s.exists()) await pc.setRemoteDescription(s.val());
+    });
+    roomRef.child("calleeCandidates").on("child_added", async s=>{
+      await pc.addIceCandidate(new RTCIceCandidate(s.val()));
+    });
+  } else {
+    let data = snap.val();
+    await pc.setRemoteDescription(data.offer);
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    await roomRef.child("answer").set(answer);
+    pc.onicecandidate = e=>{
+      if(e.candidate) roomRef.child("calleeCandidates").push(e.candidate.toJSON());
     };
+    roomRef.child("callerCandidates").on("child_added", async s=>{
+      await pc.addIceCandidate(new RTCIceCandidate(s.val()));
+    });
+  }
+}
 
-    // === 3) State ===
-    let pc, localStream, remoteStream, roomRef, callerCandidatesRef, calleeCandidatesRef;
-    let currentVideoDeviceId = null;
+function sendMsg(){
+  const msg = document.getElementById("msg").value;
+  if(dc && dc.readyState==="open"){
+    dc.send(msg);
+    logChat(msg, "me");
+  }
+  document.getElementById("msg").value="";
+}
 
-    const pcConfig = () => {
-      const iceServers = [
-        { urls: ["stun:stun.l.google.com:19302","stun:stun1.l.google.com:19302"] },
-      ];
-      if (els.turnUrl.value) {
-        iceServers.push({ urls: els.turnUrl.value, username: els.turnUser.value || undefined, credential: els.turnPass.value || undefined });
-      }
-      return { iceServers };
-    };
-
-    // === 4) Helpers ===
-    const setStatus = (t) => els.status.textContent = t;
-    function updatePCStates(){
-      if (!pc) return;
-      els.iceState.textContent = pc.iceConnectionState;
-      els.dtlsState.textContent = pc.connectionState;
-      els.pcState.textContent = pc.signalingState;
-    }
-    function show(el){ el.classList.remove('hidden'); }
-    function hide(el){ el.classList.add('hidden'); }
-
-    async function listDevices(){
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const audioInputs = devices.filter(d => d.kind === 'audioinput');
-      const videoInputs = devices.filter(d => d.kind === 'videoinput');
-      els.audioIn.innerHTML = audioInputs.map(d=>`<option value="${d.deviceId}">${d.label||'Mic'}</option>`).join('');
-      els.videoIn.innerHTML = videoInputs.map(d=>`<option value="${d.deviceId}">${d.label||'Camera'}</option>`).join('');
-      if (videoInputs[0]) currentVideoDeviceId = videoInputs[0].deviceId;
-    }
-
-    async function getMedia(constraints){
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        return stream;
-      } catch(err){
-        alert('Không truy cập được camera/mic: ' + err.message);
-        throw err;
-      }
-    }
-
-    async function startLocal(){
-      localStream = await getMedia({
-        audio: { deviceId: els.audioIn.value ? { exact: els.audioIn.value } : undefined },
-        video: { deviceId: currentVideoDeviceId ? { exact: currentVideoDeviceId } : undefined, width: {ideal: 1280}, height: {ideal: 720} }
-      });
-      els.localVideo.srcObject = localStream;
-    }
-
-    function createPeer(){
-      pc = new RTCPeerConnection(pcConfig());
-      updatePCStates();
-      pc.oniceconnectionstatechange = updatePCStates;
-      pc.onconnectionstatechange = updatePCStates;
-      pc.onsignalingstatechange = updatePCStates;
-      remoteStream = new MediaStream();
-      els.remoteVideo.srcObject = remoteStream;
-      localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
-      pc.ontrack = (e) => e.streams[0].getTracks().forEach(t => remoteStream.addTrack(t));
-      return pc;
-    }
-
-    function genRoomId(){
-      const s = Math.random().toString(36).slice(2,8) + '-' + Math.random().toString(36).slice(2,6);
-      els.roomId.value = s;
-    }
-
-    async function createRoom(){
-      if(!db){ return alert('Bạn chưa cấu hình Firebase!'); }
-      const rid = els.roomId.value.trim();
-      if(!rid) return alert('Nhập Room ID.');
-      await startLocal();
-      createPeer();
-      setStatus('Creating room...');
-      roomRef = db.ref('rooms/' + rid);
-      callerCandidatesRef = roomRef.child('callerCandidates');
-      calleeCandidatesRef = roomRef.child('calleeCandidates');
-
-      pc.onicecandidate = (event) => {
-        if (event.candidate) callerCandidatesRef.push(event.candidate.toJSON());
-      };
-
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-      await roomRef.set({ offer });
-
-      roomRef.child('answer').on('value', async (snap) => {
-        const answer = snap.val();
-        if (answer && !pc.currentRemoteDescription) {
-          await pc.setRemoteDescription(new RTCSessionDescription(answer));
-          setStatus('Connected (waiting ICE)');
-        }
-      });
-
-      calleeCandidatesRef.on('child_added', async (snap) => {
-        try { await pc.addIceCandidate(new RTCIceCandidate(snap.val())); } catch(e){ console.warn(e); }
-      });
-
-      hide(els.createBtn); hide(els.joinBtn); show(els.hangupBtn);
-      setStatus('Room created. Share Room ID cho người kia.');
-    }
-
-    async function joinRoom(){
-      if(!db){ return alert('Bạn chưa cấu hình Firebase!'); }
-      const rid = els.roomId.value.trim();
-      if(!rid) return alert('Nhập Room ID.');
-      await startLocal();
-      createPeer();
-      setStatus('Joining room...');
-
-      roomRef = db.ref('rooms/' + rid);
-      const roomSnap = await roomRef.get();
-      if(!roomSnap.exists()) return alert('Room không tồn tại.');
-
-      callerCandidatesRef = roomRef.child('callerCandidates');
-      calleeCandidatesRef = roomRef.child('calleeCandidates');
-
-      pc.onicecandidate = (event) => {
-        if (event.candidate) calleeCandidatesRef.push(event.candidate.toJSON());
-      };
-
-      const offer = roomSnap.val().offer;
-      await pc.setRemoteDescription(new RTCSessionDescription(offer));
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-      await roomRef.child('answer').set(answer);
-
-      callerCandidatesRef.on('child_added', async (snap) => {
-        try { await pc.addIceCandidate(new RTCIceCandidate(snap.val())); } catch(e){ console.warn(e); }
-      });
-
-      hide(els.createBtn); hide(els.joinBtn); show(els.hangupBtn);
-      setStatus('Joined. Đang kết nối...');
-    }
-
-    async function hangup(){
-      setStatus('Hang up...');
-      try {
-        if (pc) pc.getSenders().forEach(s => { try{s.track.stop();}catch(_){} });
-        if (pc) pc.close();
-        if (localStream) localStream.getTracks().forEach(t=>t.stop());
-      } catch(_){}
-      if (roomRef) {
-        try { await roomRef.remove(); } catch(_){}
-      }
-      pc = null; roomRef = null; localStream = null; remoteStream = null;
-      els.localVideo.srcObject = null; els.remoteVideo.srcObject = null;
-      show(els.createBtn); show(els.joinBtn); hide(els.hangupBtn);
-      setStatus('Idle'); updatePCStates();
-    }
-
-    // Toggles
-    function toggleMic(){
-      if(!localStream) return;
-      const track = localStream.getAudioTracks()[0];
-      if(!track) return;
-      track.enabled = !track.enabled;
-      els.toggleMic.textContent = track.enabled ? 'Mute Mic' : 'Unmute Mic';
-    }
-    function toggleCam(){
-      if(!localStream) return;
-      const track = localStream.getVideoTracks()[0];
-      if(!track) return;
-      track.enabled = !track.enabled;
-      els.toggleCam.textContent = track.enabled ? 'Turn Off Cam' : 'Turn On Cam';
-    }
-    async function switchCamera(){
-      const options = Array.from(els.videoIn.options).map(o=>o.value);
-      if (options.length < 2) return;
-      const idx = options.indexOf(currentVideoDeviceId);
-      const nextId = options[(idx+1)%options.length];
-      currentVideoDeviceId = nextId;
-      const newStream = await getMedia({ video: { deviceId: { exact: nextId } }, audio: true });
-      const newTrack = newStream.getVideoTracks()[0];
-      const sender = pc && pc.getSenders().find(s=>s.track && s.track.kind==='video');
-      if (sender) await sender.replaceTrack(newTrack);
-      if (localStream){ localStream.getVideoTracks().forEach(t=>t.stop()); }
-      localStream = new MediaStream([newTrack, ...newStream.getAudioTracks()]);
-      els.localVideo.srcObject = localStream;
-    }
-
-    // === 5) Bindings ===
-    els.genId.addEventListener('click', genRoomId);
-    els.createBtn.addEventListener('click', createRoom);
-    els.joinBtn.addEventListener('click', joinRoom);
-    els.hangupBtn.addEventListener('click', hangup);
-    els.toggleMic.addEventListener('click', toggleMic);
-    els.toggleCam.addEventListener('click', toggleCam);
-    els.switchCam.addEventListener('click', switchCamera);
-    els.audioIn.addEventListener('change', async ()=>{ if(localStream) await startLocal(); });
-    els.videoIn.addEventListener('change', async ()=>{ currentVideoDeviceId = els.videoIn.value; if(localStream) await startLocal(); });
-
-    // === 6) Boot ===
-    (async () => {
-      await listDevices();
-      try { await startLocal(); } catch(_) {}
-      genRoomId();
-      setStatus('Ready');
-    })();
-
-    // Rời tab sẽ dọn dẹp
-    window.addEventListener('beforeunload', () => { if (roomRef) roomRef.remove(); });
-  </script>
+async function shareScreen(){
+  let stream = await navigator.mediaDevices.getDisplayMedia({ video:true });
+  stream.getTracks().forEach(track=>{
+    pc.getSenders()[0].replaceTrack(track);
+  });
+}
+</script>
 </body>
 </html>
