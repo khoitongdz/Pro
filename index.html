@@ -25,192 +25,559 @@
   <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <style>
-    body{margin:0;font-family:Segoe UI, sans-serif;background:#0f172a;color:#fff;display:flex;flex-direction:column;height:100vh;}
-    header{padding:12px;text-align:center;background:#1e293b;}
-    .main{flex:1;display:flex;gap:12px;padding:12px;}
-    .videos{flex:3;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;background:#000;border-radius:12px;padding:10px;overflow:auto;}
-    video{width:100%;height:200px;object-fit:cover;border-radius:12px;background:#111;}
-    .sidebar{flex:1;background:#1e293b;border-radius:12px;display:flex;flex-direction:column;padding:12px;}
-    .roomBox{margin-bottom:12px;display:flex;gap:6px;}
-    input,button{padding:8px;border:none;border-radius:8px;font-size:14px;}
-    input{flex:1;}
-    button{background:linear-gradient(135deg,#3b82f6,#06b6d4);color:#fff;cursor:pointer;font-weight:600;transition:.2s;}
-    button:hover{opacity:.85;}
-    .chatBox{flex:1;background:#0f172a;border-radius:8px;padding:6px;overflow-y:auto;margin:6px 0;}
-    .msg{margin:4px 0;}
-    .me{color:#3b82f6;}
-    .peer{color:#06b6d4;}
-    .controls{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
-    #qrcode{margin-top:10px;}
-    .userList{background:#0f172a;border-radius:8px;padding:6px;max-height:120px;overflow-y:auto;margin:6px 0;font-size:14px;}
-    .userList div{padding:4px 0;border-bottom:1px solid #1e293b;display:flex;justify-content:space-between;align-items:center;}
-    .spotlight video{width:100%!important;height:400px!important;}
+    body {
+      margin: 0;
+      font-family: Segoe UI, sans-serif;
+      background: #0f172a;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      padding: 12px;
+      text-align: center;
+      background: #1e293b;
+    }
+    .main {
+      flex: 1;
+      display: flex;
+      gap: 12px;
+      padding: 12px;
+    }
+    .videos {
+      flex: 3;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 10px;
+      background: #000;
+      border-radius: 12px;
+      padding: 10px;
+      overflow: auto;
+    }
+    video {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 12px;
+      background: #111;
+      transform: rotateY(0deg); /* Fix for mirrored video */
+    }
+    .sidebar {
+      flex: 1;
+      background: #1e293b;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      padding: 12px;
+    }
+    .roomBox {
+      margin-bottom: 12px;
+      display: flex;
+      gap: 6px;
+    }
+    input, button {
+      padding: 8px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    input {
+      flex: 1;
+    }
+    button {
+      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      color: #fff;
+      cursor: pointer;
+      font-weight: 600;
+      transition: .2s;
+    }
+    button:hover {
+      opacity: .85;
+    }
+    .chatBox {
+      flex: 1;
+      background: #0f172a;
+      border-radius: 8px;
+      padding: 6px;
+      overflow-y: auto;
+      margin: 6px 0;
+    }
+    .msg {
+      margin: 4px 0;
+    }
+    .me {
+      color: #3b82f6;
+    }
+    .peer {
+      color: #06b6d4;
+    }
+    .error {
+      color: #ef4444;
+    }
+    .controls {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+    #qrcode {
+      margin-top: 10px;
+    }
+    .userList {
+      background: #0f172a;
+      border-radius: 8px;
+      padding: 6px;
+      max-height: 120px;
+      overflow-y: auto;
+      margin: 6px 0;
+      font-size: 14px;
+    }
+    .userList div {
+      padding: 4px 0;
+      border-bottom: 1px solid #1e293b;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .spotlight video {
+      width: 100% !important;
+      height: 400px !important;
+    }
+    .status {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 6px;
+    }
+    .video-container {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      background: #111;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 14px;
+      text-align: center;
+    }
+    .video-label {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body>
-<header><h2>📱 Cloud Room Pro</h2></header>
-<div class="main">
-  <div class="videos" id="videos"></div>
-  <div class="sidebar">
-    <div class="roomBox">
-      <button onclick="createRoom()">Tạo phòng</button>
-      <input id="roomId" placeholder="Nhập Room ID"/>
-      <button onclick="joinRoom()">Join</button>
-    </div>
-    <div id="roomInfo"></div>
-    <canvas id="qrcode"></canvas>
-    <div class="userList" id="users"></div>
-    <div class="chatBox" id="chat"></div>
-    <div class="controls">
-      <input id="msg" placeholder="Tin nhắn..."/>
-      <button onclick="sendMsg()">💬 Gửi</button>
-      <button onclick="toggleMic()">🎤 Mic</button>
-      <button onclick="toggleCam()">📷 Cam</button>
-      <button onclick="shareScreen()">📺 Share</button>
-      <button onclick="toggleLayout()">🖼 Layout</button>
+  <header><h2>📱 Cloud Room Pro</h2></header>
+  <div class="main">
+    <div class="videos" id="videos"></div>
+    <div class="sidebar">
+      <div class="roomBox">
+        <button onclick="createRoom()">Tạo phòng</button>
+        <input id="roomId" placeholder="Nhập Room ID"/>
+        <button onclick="joinRoom()">Join</button>
+      </div>
+      <div id="roomInfo"></div>
+      <div class="status" id="status">Đang chờ kết nối...</div>
+      <canvas id="qrcode"></canvas>
+      <div class="userList" id="users"></div>
+      <div class="chatBox" id="chat"></div>
+      <div class="controls">
+        <input id="msg" placeholder="Tin nhắn..."/>
+        <button onclick="sendMsg()">💬 Gửi</button>
+        <button id="micBtn" onclick="toggleMic()">🎤 Mic</button>
+        <button id="camBtn" onclick="toggleCam()">📷 Cam</button>
+        <button id="shareBtn" onclick="shareScreen()">📺 Share</button>
+        <button onclick="toggleLayout()">🖼 Layout</button>
+      </div>
     </div>
   </div>
-</div>
 
-<script>
-let peer,myStream,roomId,myId,isHost=false;
-let peers={},conns={},usersList={},micOn=true,camOn=true,layout="grid";
+  <script>
+    let peer, myStream, roomId, myId, isHost = false;
+    let peers = {}, conns = {}, usersList = {}, micOn = true, camOn = true, layout = "grid", screenStream = null;
 
-function createRoom(){
-  roomId="room-"+Math.random().toString(36).substr(2,6);
-  isHost=true;
-  document.getElementById("roomId").value=roomId;
-  document.getElementById("roomInfo").innerHTML="Phòng: <b>"+roomId+"</b> (Chủ phòng)";
-  QRCode.toCanvas(document.getElementById("qrcode"),window.location.href+"#"+roomId);
-  startPeer();
-}
-function joinRoom(){
-  roomId=document.getElementById("roomId").value.trim();
-  if(!roomId) return alert("Nhập Room ID");
-  document.getElementById("roomInfo").innerHTML="Join phòng: <b>"+roomId+"</b>";
-  QRCode.toCanvas(document.getElementById("qrcode"),window.location.href+"#"+roomId);
-  startPeer();
-}
-async function startPeer(){
-  myId="user-"+Math.random().toString(36).substr(2,6);
-  peer=new Peer(myId,{host:'peerjs.com',secure:true,port:443});
-
-  peer.on("open", async ()=>{
-    myStream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
-    addVideo(myStream,myId,true);
-    addUser(myId);
-  });
-
-  peer.on("connection",c=>{
-    c.on("data",d=>{
-      if(d.type==="chat") logChat(d.msg,"peer");
-      if(d.type==="join") addUser(d.id);
-      if(d.type==="leave") removeUser(d.id);
-      if(d.type==="hostCmd" && isHost) handleHostCmd(d);
-    });
-  });
-
-  peer.on("call",c=>{
-    c.answer(myStream);
-    c.on("stream",s=>addVideo(s,c.peer));
-    addUser(c.peer);
-  });
-}
-function connectTo(id){
-  if(conns[id]) return;
-  conns[id]=peer.connect(id);
-  conns[id].on("open",()=>{conns[id].send({type:"join",id:myId});});
-  conns[id].on("data",d=>{
-    if(d.type==="chat") logChat(d.msg,"peer");
-    if(d.type==="join") addUser(d.id);
-    if(d.type==="leave") removeUser(d.id);
-    if(d.type==="hostCmd") handleHostCmd(d);
-  });
-
-  let call=peer.call(id,myStream);
-  call.on("stream",s=>addVideo(s,id));
-  peers[id]=call;
-  addUser(id);
-}
-function sendMsg(){
-  let msg=document.getElementById("msg").value;
-  if(!msg) return;
-  logChat(msg,"me");
-  for(let id in conns){ if(conns[id].open) conns[id].send({type:"chat",msg}); }
-  document.getElementById("msg").value="";
-}
-function logChat(msg,who){
-  let div=document.createElement("div");
-  div.className="msg "+who;
-  div.textContent=(who==="me"?"Bạn: ":"Người khác: ")+msg;
-  document.getElementById("chat").appendChild(div);
-  document.getElementById("chat").scrollTop=document.getElementById("chat").scrollHeight;
-}
-function addVideo(stream,id,self=false){
-  if(document.getElementById("v-"+id)) return;
-  let video=document.createElement("video");
-  video.srcObject=stream;
-  video.autoplay=true;video.playsInline=true;
-  if(self) video.muted=true;
-  video.id="v-"+id;
-  document.getElementById("videos").appendChild(video);
-}
-function toggleMic(){
-  micOn=!micOn;
-  myStream.getAudioTracks()[0].enabled=micOn;
-  alert("Mic "+(micOn?"bật":"tắt"));
-}
-function toggleCam(){
-  camOn=!camOn;
-  myStream.getVideoTracks()[0].enabled=camOn;
-  alert("Camera "+(camOn?"bật":"tắt"));
-}
-async function shareScreen(){
-  let screen=await navigator.mediaDevices.getDisplayMedia({video:true});
-  for(let id in peers){
-    let sender=peers[id].peerConnection.getSenders().find(s=>s.track.kind==="video");
-    if(sender) sender.replaceTrack(screen.getTracks()[0]);
-  }
-}
-function addUser(id){
-  if(usersList[id]) return;
-  usersList[id]=true;
-  updateUsers();
-}
-function removeUser(id){
-  delete usersList[id];
-  if(document.getElementById("v-"+id)) document.getElementById("v-"+id).remove();
-  updateUsers();
-}
-function updateUsers(){
-  let box=document.getElementById("users");
-  box.innerHTML="<b>👥 Thành viên:</b><br>";
-  Object.keys(usersList).forEach(id=>{
-    let row=document.createElement("div");
-    row.innerHTML="• "+id;
-    if(isHost && id!==myId){
-      let controls=document.createElement("span");
-      controls.innerHTML=` <button onclick="sendHostCmd('${id}','mute')">🔇</button> <button onclick="sendHostCmd('${id}','cam')">📵</button>`;
-      row.appendChild(controls);
+    function updateStatus(message, isError = false) {
+      const statusEl = document.getElementById("status");
+      statusEl.textContent = message;
+      statusEl.className = `status ${isError ? 'error' : ''}`;
     }
-    box.appendChild(row);
-  });
-}
-function toggleLayout(){
-  let videos=document.getElementById("videos");
-  if(layout==="grid"){layout="spotlight";videos.classList.add("spotlight");}
-  else{layout="grid";videos.classList.remove("spotlight");}
-}
-function sendHostCmd(target,cmd){
-  if(conns[target]&&conns[target].open){
-    conns[target].send({type:"hostCmd",cmd});
-  }
-}
-function handleHostCmd(d){
-  if(d.cmd==="mute"){myStream.getAudioTracks()[0].enabled=false;alert("Chủ phòng tắt mic của bạn");}
-  if(d.cmd==="cam"){myStream.getVideoTracks()[0].enabled=false;alert("Chủ phòng tắt camera của bạn");}
-}
-window.onbeforeunload=()=>{for(let id in conns){conns[id].send({type:"leave",id:myId});}};
-</script>
+
+    function createRoom() {
+      roomId = "room-" + Math.random().toString(36).substr(2, 6);
+      isHost = true;
+      document.getElementById("roomId").value = roomId;
+      document.getElementById("roomInfo").innerHTML = `Phòng: <b>${roomId}</b> (Chủ phòng)`;
+      QRCode.toCanvas(document.getElementById("qrcode"), window.location.href + "#" + roomId, { width: 100 }, err => {
+        if (err) updateStatus("Lỗi tạo QR code: " + err.message, true);
+      });
+      updateStatus("Đã tạo phòng, đang khởi tạo kết nối...");
+      startPeer();
+    }
+
+    function joinRoom() {
+      roomId = document.getElementById("roomId").value.trim();
+      if (!roomId.match(/^room-[a-z0-9]{6}$/)) {
+        updateStatus("Room ID không hợp lệ", true);
+        return;
+      }
+      document.getElementById("roomInfo").innerHTML = `Join phòng: <b>${roomId}</b>`;
+      QRCode.toCanvas(document.getElementById("qrcode"), window.location.href + "#" + roomId, { width: 100 }, err => {
+        if (err) updateStatus("Lỗi tạo QR code: " + err.message, true);
+      });
+      updateStatus("Đang tham gia phòng...");
+      startPeer();
+    }
+
+    async function startPeer() {
+      try {
+        myId = "user-" + Math.random().toString(36).substr(2, 6);
+        peer = new Peer(myId, {
+          host: 'peerjs.com',
+          secure: true,
+          port: 443,
+          config: {
+            iceServers: [
+              { urls: 'stun:stun.l.google.com:19302' },
+              // Replace with your TURN server for production
+              // { urls: 'turn:your-turn-server', username: 'user', credential: 'pass' }
+            ]
+          }
+        });
+
+        peer.on("open", async () => {
+          try {
+            myStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            console.log("Local stream obtained:", myStream.getTracks());
+            addVideo(myStream, myId, true);
+            addUser(myId, "Bạn");
+            updateStatus("Đã kết nối, chờ các thành viên khác...");
+            if (!isHost) {
+              connectToRoomPeers();
+            }
+          } catch (err) {
+            updateStatus("Không thể truy cập camera/mic: " + err.message, true);
+            console.error("Media error:", err);
+          }
+        });
+
+        peer.on("connection", conn => {
+          conns[conn.peer] = conn;
+          conn.on("data", data => {
+            if (data.type === "chat") logChat(data.msg, data.sender, "peer");
+            if (data.type === "join") addUser(data.id, data.name || data.id);
+            if (data.type === "leave") removeUser(data.id);
+            if (data.type === "hostCmd") handleHostCmd(data);
+          });
+          conn.on("close", () => {
+            removeUser(conn.peer);
+            delete conns[conn.peer];
+          });
+        });
+
+        peer.on("call", call => {
+          if (!myStream) {
+            updateStatus("Không có stream để trả lời cuộc gọi", true);
+            return;
+          }
+          call.answer(myStream);
+          call.on("stream", stream => {
+            console.log("Received remote stream:", stream.getTracks());
+            addVideo(stream, call.peer);
+          });
+          call.on("close", () => removeUser(call.peer));
+          call.on("error", err => updateStatus("Lỗi cuộc gọi: " + err.message, true));
+          peers[call.peer] = call;
+        });
+
+        peer.on("error", err => {
+          updateStatus("Lỗi PeerJS: " + err.message, true);
+          console.error("PeerJS error:", err);
+          setTimeout(reconnectPeer, 5000);
+        });
+
+        peer.on("disconnected", () => {
+          updateStatus("Mất kết nối, đang thử kết nối lại...", true);
+          reconnectPeer();
+        });
+
+      } catch (err) {
+        updateStatus("Không thể khởi tạo PeerJS: " + err.message, true);
+        console.error("PeerJS init error:", err);
+      }
+    }
+
+    function connectToRoomPeers() {
+      const hostId = roomId.replace("room-", "user-"); // Simplified, assumes host ID format
+      if (hostId !== myId) connectTo(hostId);
+    }
+
+    function connectTo(id) {
+      if (conns[id] || id === myId) return;
+      const conn = peer.connect(id);
+      conns[id] = conn;
+      conn.on("open", () => {
+        conn.send({ type: "join", id: myId, name: "Người dùng " + myId.slice(5) });
+      });
+      conn.on("data", data => {
+        if (data.type === "chat") logChat(data.msg, data.sender, "peer");
+        if (data.type === "join") addUser(data.id, data.name || data.id);
+        if (data.type === "leave") removeUser(data.id);
+        if (data.type === "hostCmd") handleHostCmd(data);
+      });
+      conn.on("close", () => {
+        removeUser(id);
+        delete conns[id];
+        delete peers[id];
+      });
+
+      if (myStream) {
+        const call = peer.call(id, myStream);
+        call.on("stream", stream => {
+          console.log("Received remote stream for call:", stream.getTracks());
+          addVideo(stream, id);
+        });
+        call.on("close", () => removeUser(id));
+        call.on("error", err => updateStatus("Lỗi cuộc gọi: " + err.message, true));
+        peers[id] = call;
+      }
+    }
+
+    function sendMsg() {
+      const msg = document.getElementById("msg").value.trim();
+      if (!msg) return;
+      const sender = "Bạn";
+      logChat(msg, sender, "me");
+      for (let id in conns) {
+        if (conns[id].open) {
+          conns[id].send({ type: "chat", msg, sender });
+        }
+      }
+      document.getElementById("msg").value = "";
+    }
+
+    function logChat(msg, sender, who) {
+      const div = document.createElement("div");
+      div.className = `msg ${who}`;
+      div.textContent = `${sender}: ${msg}`;
+      document.getElementById("chat").appendChild(div);
+      document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
+    }
+
+    function addVideo(stream, id, self = false) {
+      if (document.getElementById("v-" + id)) return;
+      if (!stream.getVideoTracks().length && !self) {
+        updateStatus(`Stream từ ${id} không có video`, true);
+        console.warn(`No video tracks in stream for ${id}`);
+        return;
+      }
+
+      const container = document.createElement("div");
+      container.className = "video-container";
+      container.id = "v-" + id;
+
+      const video = document.createElement("video");
+      video.srcObject = stream;
+      video.autoplay = true;
+      video.playsInline = true;
+      if (self) video.muted = true;
+      video.style.width = "100%";
+      video.style.height = "100%";
+      video.style.objectFit = "cover";
+
+      const label = document.createElement("div");
+      label.className = "video-label";
+      label.textContent = self ? "Bạn" : usersList[id] || id;
+
+      container.appendChild(video);
+      container.appendChild(label);
+      document.getElementById("videos").appendChild(container);
+
+      video.addEventListener("loadedmetadata", () => {
+        video.play().catch(err => {
+          updateStatus("Lỗi phát video: " + err.message, true);
+          console.error("Video playback error:", err);
+        });
+      });
+
+      stream.getTracks().forEach(track => {
+        track.onended = () => {
+          if (document.getElementById("v-" + id)) {
+            document.getElementById("v-" + id).remove();
+            updateStatus(`Stream từ ${id} đã kết thúc`);
+          }
+        };
+      });
+
+      console.log(`Added video for ${id}, tracks:`, stream.getTracks());
+    }
+
+    function toggleMic() {
+      if (!myStream) return;
+      micOn = !micOn;
+      myStream.getAudioTracks().forEach(track => track.enabled = micOn);
+      document.getElementById("micBtn").style.opacity = micOn ? 1 : 0.5;
+      updateStatus("Mic " + (micOn ? "bật" : "tắt"));
+    }
+
+    function toggleCam() {
+      if (!myStream) return;
+      camOn = !camOn;
+      myStream.getVideoTracks().forEach(track => track.enabled = camOn);
+      document.getElementById("camBtn").style.opacity = camOn ? 1 : 0.5;
+      updateStatus("Camera " + (camOn ? "bật" : "tắt"));
+    }
+
+    async function shareScreen() {
+      try {
+        if (screenStream) {
+          screenStream.getTracks().forEach(track => track.stop());
+          screenStream = null;
+          document.getElementById("shareBtn").textContent = "📺 Share";
+          updateStatus("Đã dừng chia sẻ màn hình");
+          // Revert to camera stream
+          if (myStream) {
+            for (let id in peers) {
+              const sender = peers[id].peerConnection.getSenders().find(s => s.track?.kind === "video");
+              if (sender && myStream.getVideoTracks().length) {
+                sender.replaceTrack(myStream.getVideoTracks()[0]);
+              }
+            }
+            // Update local video to show camera
+            const localVideo = document.getElementById("v-" + myId)?.querySelector("video");
+            if (localVideo && myStream.getVideoTracks().length) {
+              localVideo.srcObject = myStream;
+            }
+          }
+          return;
+        }
+
+        screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+        console.log("Screen stream obtained:", screenStream.getTracks());
+        document.getElementById("shareBtn").textContent = "🛑 Stop Share";
+        updateStatus("Đang chia sẻ màn hình");
+
+        // Update local video to show screen
+        const localVideo = document.getElementById("v-" + myId)?.querySelector("video");
+        if (localVideo) {
+          localVideo.srcObject = screenStream;
+        }
+
+        // Replace video track for all peers
+        for (let id in peers) {
+          const sender = peers[id].peerConnection.getSenders().find(s => s.track?.kind === "video");
+          if (sender && screenStream.getVideoTracks().length) {
+            sender.replaceTrack(screenStream.getVideoTracks()[0]);
+          }
+        }
+
+        screenStream.getVideoTracks()[0].onended = () => {
+          shareScreen(); // Auto-stop sharing when user cancels
+        };
+      } catch (err) {
+        updateStatus("Lỗi chia sẻ màn hình: " + err.message, true);
+        console.error("Screen sharing error:", err);
+      }
+    }
+
+    function addUser(id, name = id) {
+      if (usersList[id]) return;
+      usersList[id] = name;
+      updateUsers();
+    }
+
+    function removeUser(id) {
+      delete usersList[id];
+      if (document.getElementById("v-" + id)) {
+        document.getElementById("v-" + id).remove();
+      }
+      delete peers[id];
+      delete conns[id];
+      updateUsers();
+    }
+
+    function updateUsers() {
+      const box = document.getElementById("users");
+      box.innerHTML = "<b>👥 Thành viên:</b><br>";
+      Object.keys(usersList).forEach(id => {
+        const row = document.createElement("div");
+        row.innerHTML = `• ${usersList[id]}`;
+        if (isHost && id !== myId) {
+          const controls = document.createElement("span");
+          controls.innerHTML = ` <button onclick="sendHostCmd('${id}', 'mute')">🔇</button> <button onclick="sendHostCmd('${id}', 'cam')">📵</button>`;
+          row.appendChild(controls);
+        }
+        box.appendChild(row);
+      });
+    }
+
+    function toggleLayout() {
+      const videos = document.getElementById("videos");
+      if (layout === "grid") {
+        layout = "spotlight";
+        videos.classList.add("spotlight");
+      } else {
+        layout = "grid";
+        videos.classList.remove("spotlight");
+      }
+    }
+
+    function sendHostCmd(target, cmd) {
+      if (conns[target] && conns[target].open) {
+        conns[target].send({ type: "hostCmd", cmd });
+      }
+    }
+
+    function handleHostCmd(data) {
+      if (data.cmd === "mute" && myStream) {
+        myStream.getAudioTracks().forEach(track => track.enabled = false);
+        micOn = false;
+        document.getElementById("micBtn").style.opacity = 0.5;
+        updateStatus("Chủ phòng tắt mic của bạn");
+      }
+      if (data.cmd === "cam" && myStream) {
+        myStream.getVideoTracks().forEach(track => track.enabled = false);
+        camOn = false;
+        document.getElementById("camBtn").style.opacity = 0.5;
+        updateStatus("Chủ phòng tắt camera của bạn");
+      }
+    }
+
+    function reconnectPeer() {
+      if (peer && peer.disconnected) {
+        peer.reconnect();
+        updateStatus("Đang thử kết nối lại...");
+      }
+    }
+
+    window.onbeforeunload = () => {
+      for (let id in conns) {
+        if (conns[id].open) {
+          conns[id].send({ type: "leave", id: myId });
+        }
+      }
+      if (myStream) {
+        myStream.getTracks().forEach(track => track.stop());
+      }
+      if (screenStream) {
+        screenStream.getTracks().forEach(track => track.stop());
+      }
+      if (peer) peer.destroy();
+    };
+
+    // Auto-join room from URL hash
+    if (window.location.hash) {
+      const hashRoomId = window.location.hash.slice(1);
+      if (hashRoomId.match(/^room-[a-z0-9]{6}$/)) {
+        document.getElementById("roomId").value = hashRoomId;
+        joinRoom();
+      }
+    }
+  </script>
 </body>
 </html>
