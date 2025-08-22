@@ -5,15 +5,15 @@
   <title>Cloud Room Pro</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Cloud Room Pro - Giải pháp họp trực tuyến, gọi video nhóm, chat và chia sẻ màn hình nhanh chóng, bảo mật.">
-  <meta name="keywords" content="cloud room, video call, chat trực tuyến, họp online, chia sẻ màn hình, peerjs">
+  <meta name="keywords" content="cloud room, video call, chat trực tuyến, họp online, chia sẻ màn hình, simple-peer">
   <meta name="author" content="Cloud Room Pro">
 
   <!-- Open Graph -->
   <meta property="og:title" content="Cloud Room Pro - Họp trực tuyến thông minh">
   <meta property="og:description" content="Tạo phòng họp, gọi video, chat và chia sẻ màn hình chỉ trong vài giây.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://yourdomain.com">
-  <meta property="og:image" content="https://yourdomain.com/thumbnail.png">
+  <meta property="og:url" content="https://khoitongdz.github.io/Pro/">
+  <meta property="og:image" content="https://tse1.mm.bing.net/th/id/OIP.98EeoWyrRcHXvv0Ti90-1wHaQD?pid=Api">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
@@ -22,7 +22,7 @@
   <meta name="twitter:image" content="https://yourdomain.com/thumbnail.png">
 
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
-  <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <style>
     body {
@@ -61,7 +61,7 @@
       object-fit: cover;
       border-radius: 12px;
       background: #111;
-      transform: rotateY(0deg); /* Fix for mirrored video */
+      transform: rotateY(0deg);
     }
     .sidebar {
       flex: 1;
@@ -170,6 +170,14 @@
       padding: 4px 8px;
       border-radius: 4px;
     }
+    .no-stream {
+      background: #222;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 10px;
+    }
   </style>
 </head>
 <body>
@@ -181,6 +189,7 @@
         <button onclick="createRoom()">Tạo phòng</button>
         <input id="roomId" placeholder="Nhập Room ID"/>
         <button onclick="joinRoom()">Join</button>
+        <button onclick="retryMediaAccess()" style="background: #ef4444; display: none;" id="retryMediaBtn">Thử lại Camera/Mic</button>
       </div>
       <div id="roomInfo"></div>
       <div class="status" id="status">Đang chờ kết nối...</div>
@@ -190,25 +199,66 @@
       <div class="controls">
         <input id="msg" placeholder="Tin nhắn..."/>
         <button onclick="sendMsg()">💬 Gửi</button>
-        <button id="micBtn" onclick="toggleMic()">🎤 Mic</button>
-        <button id="camBtn" onclick="toggleCam()">📷 Cam</button>
-        <button id="shareBtn" onclick="shareScreen()">📺 Share</button>
+        <button id="micBtn" onclick="toggleMic()" disabled>🎤 Mic</button>
+        <button id="camBtn" onclick="toggleCam()" disabled>📷 Cam</button>
+        <button id="shareBtn" onclick="shareScreen()" disabled>📺 Share</button>
         <button onclick="toggleLayout()">🖼 Layout</button>
       </div>
     </div>
   </div>
 
   <script>
-    let peer, myStream, roomId, myId, isHost = false;
-    let peers = {}, conns = {}, usersList = {}, micOn = true, camOn = true, layout = "grid", screenStream = null;
+    let myStream, roomId, myId, isHost = false;
+    let peers = {}, usersList = {}, micOn = true, camOn = true, layout = "grid", screenStream = null;
+    const ws = new WebSocket('wss://socketsbay.com/wss/v2/2/demo/');
+    let reconnectAttempts = 0, maxReconnectAttempts = 5;
 
-    function updateStatus(message, isError = false) {
+    function updateStatus(message, isError = donnay) {
       const statusEl = document.getElementById("status");
       statusEl.textContent = message;
       statusEl.className = `status ${isError ? 'error' : ''}`;
+      console.log(`Status: ${message}`);
+      document.getElementById("retryMediaBtn").style.display = isError && message.includes("camera/mic") ? "inline-block" : "none";
+    }
+
+    async function retryMediaAccess() {
+      updateStatus("Đang thử truy cập lại camera/mic...");
+      try {
+        myStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        console.log("Local stream obtained:", myStream.getTracks());
+        addVideo(myStream, myId, true);
+        document.getElementById("micBtn").disabled = false;
+        document.getElementById("camBtn").disabled = false;
+        document.getElementById("shareBtn").disabled = false;
+        updateStatus("Đã truy cập camera/mic thành công");
+        for (let id in peers) {
+          peers[id].addStream(myStream);
+        }
+      } catch (err) {
+        updateStatus("Không thể truy cập camera/mic: " + err.message, true);
+        console.error("Media retry error:", err);
+        try {
+          myStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          console.log("Fallback to audio-only stream:", myStream.getTracks());
+          addVideo(myStream, myId, true);
+          document.getElementById("micBtn").disabled = false;
+          updateStatus("Không có camera, chỉ sử dụng mic");
+          for (let id in peers) {
+            peers[id].addStream(myStream);
+          }
+        } catch (audioErr) {
+          updateStatus("Không thể truy cập mic: " + audioErr.message, true);
+          console.error("Audio fallback error:", audioErr);
+          addNoStreamPlaceholder(myId);
+        }
+      }
     }
 
     function createRoom() {
+      if (location.protocol !== 'https:') {
+        updateStatus("Ứng dụng yêu cầu HTTPS để truy cập camera/mic. Vui lòng chạy trên HTTPS.", true);
+        return;
+      }
       roomId = "room-" + Math.random().toString(36).substr(2, 6);
       isHost = true;
       document.getElementById("roomId").value = roomId;
@@ -217,10 +267,14 @@
         if (err) updateStatus("Lỗi tạo QR code: " + err.message, true);
       });
       updateStatus("Đã tạo phòng, đang khởi tạo kết nối...");
-      startPeer();
+      initWebRTC();
     }
 
     function joinRoom() {
+      if (location.protocol !== 'https:') {
+        updateStatus("Ứng dụng yêu cầu HTTPS để truy cập camera/mic. Vui lòng chạy trên HTTPS.", true);
+        return;
+      }
       roomId = document.getElementById("roomId").value.trim();
       if (!roomId.match(/^room-[a-z0-9]{6}$/)) {
         updateStatus("Room ID không hợp lệ", true);
@@ -231,121 +285,144 @@
         if (err) updateStatus("Lỗi tạo QR code: " + err.message, true);
       });
       updateStatus("Đang tham gia phòng...");
-      startPeer();
+      initWebRTC();
     }
 
-    async function startPeer() {
+    async function initWebRTC() {
       try {
         myId = "user-" + Math.random().toString(36).substr(2, 6);
-        peer = new Peer(myId, {
-          host: 'peerjs.com',
-          secure: true,
-          port: 443,
-          config: {
-            iceServers: [
-              { urls: 'stun:stun.l.google.com:19302' },
-              // Replace with your TURN server for production
-              // { urls: 'turn:your-turn-server', username: 'user', credential: 'pass' }
-            ]
-          }
-        });
-
-        peer.on("open", async () => {
+        try {
+          myStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+          console.log("Local stream obtained:", myStream.getTracks());
+          addVideo(myStream, myId, true);
+          document.getElementById("micBtn").disabled = false;
+          document.getElementById("camBtn").disabled = false;
+          document.getElementById("shareBtn").disabled = false;
+          addUser(myId, "Bạn");
+          updateStatus("Đã kết nối, chờ các thành viên khác...");
+        } catch (err) {
+          updateStatus("Không thể truy cập camera/mic: " + err.message, true);
+          console.error("Media error:", err);
           try {
-            myStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            console.log("Local stream obtained:", myStream.getTracks());
+            myStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            console.log("Fallback to audio-only stream:", myStream.getTracks());
             addVideo(myStream, myId, true);
+            document.getElementById("micBtn").disabled = false;
+            updateStatus("Không có camera, chỉ sử dụng mic");
             addUser(myId, "Bạn");
-            updateStatus("Đã kết nối, chờ các thành viên khác...");
-            if (!isHost) {
-              connectToRoomPeers();
+          } catch (audioErr) {
+            updateStatus("Không thể truy cập mic: " + audioErr.message + ". Bạn có thể tham gia để chat và xem video.", true);
+            console.error("Audio fallback error:", audioErr);
+            addNoStreamPlaceholder(myId);
+            addUser(myId, "Bạn");
+          }
+        }
+
+        ws.onopen = () => {
+          console.log("WebSocket connected");
+          updateStatus("Đã kết nối với WebSocket server");
+          ws.send(JSON.stringify({ type: "join", roomId, userId: myId, name: "Người dùng " + myId.slice(5) }));
+          if (!isHost) connectToHost();
+        };
+
+        ws.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          if (data.roomId !== roomId) return;
+          if (data.type === "join" && isHost) {
+            addUser(data.userId, data.name);
+            initPeer(data.userId, true);
+          }
+          if (data.type === "signal") {
+            if (peers[data.userId]) {
+              peers[data.userId].signal(data.signal);
+            } else {
+              initPeer(data.userId, false, data.signal);
             }
-          } catch (err) {
-            updateStatus("Không thể truy cập camera/mic: " + err.message, true);
-            console.error("Media error:", err);
           }
-        });
+          if (data.type === "chat") logChat(data.msg, data.sender, "peer");
+          if (data.type === "leave") removeUser(data.userId);
+          if (data.type === "hostCmd") handleHostCmd(data);
+        };
 
-        peer.on("connection", conn => {
-          conns[conn.peer] = conn;
-          conn.on("data", data => {
-            if (data.type === "chat") logChat(data.msg, data.sender, "peer");
-            if (data.type === "join") addUser(data.id, data.name || data.id);
-            if (data.type === "leave") removeUser(data.id);
-            if (data.type === "hostCmd") handleHostCmd(data);
-          });
-          conn.on("close", () => {
-            removeUser(conn.peer);
-            delete conns[conn.peer];
-          });
-        });
+        ws.onerror = (err) => {
+          updateStatus("Lỗi WebSocket: Kiểm tra kết nối mạng.", true);
+          console.error("WebSocket error:", err);
+          scheduleReconnect();
+        };
 
-        peer.on("call", call => {
-          if (!myStream) {
-            updateStatus("Không có stream để trả lời cuộc gọi", true);
-            return;
-          }
-          call.answer(myStream);
-          call.on("stream", stream => {
-            console.log("Received remote stream:", stream.getTracks());
-            addVideo(stream, call.peer);
-          });
-          call.on("close", () => removeUser(call.peer));
-          call.on("error", err => updateStatus("Lỗi cuộc gọi: " + err.message, true));
-          peers[call.peer] = call;
-        });
-
-        peer.on("error", err => {
-          updateStatus("Lỗi PeerJS: " + err.message, true);
-          console.error("PeerJS error:", err);
-          setTimeout(reconnectPeer, 5000);
-        });
-
-        peer.on("disconnected", () => {
-          updateStatus("Mất kết nối, đang thử kết nối lại...", true);
-          reconnectPeer();
-        });
+        ws.onclose = () => {
+          updateStatus("Mất kết nối WebSocket, đang thử kết nối lại...", true);
+          console.warn("WebSocket disconnected");
+          scheduleReconnect();
+        };
 
       } catch (err) {
-        updateStatus("Không thể khởi tạo PeerJS: " + err.message, true);
-        console.error("PeerJS init error:", err);
+        updateStatus("Lỗi khởi tạo kết nối: " + err.message, true);
+        console.error("WebRTC init error:", err);
       }
     }
 
-    function connectToRoomPeers() {
-      const hostId = roomId.replace("room-", "user-"); // Simplified, assumes host ID format
-      if (hostId !== myId) connectTo(hostId);
+    function scheduleReconnect() {
+      if (reconnectAttempts >= maxReconnectAttempts) {
+        updateStatus("Không thể kết nối lại WebSocket sau nhiều lần thử.", true);
+        return;
+      }
+      const delay = Math.min(Math.pow(2, reconnectAttempts) * 1000, 30000);
+      reconnectAttempts++;
+      setTimeout(() => {
+        updateStatus(`Đang thử kết nối lại WebSocket (lần ${reconnectAttempts}/${maxReconnectAttempts})...`);
+        const newWs = new WebSocket('wss://socketsbay.com/wss/v2/2/demo/');
+        newWs.onopen = ws.onopen;
+        newWs.onmessage = ws.onmessage;
+        newWs.onerror = ws.onerror;
+        newWs.onclose = ws.onclose;
+        ws = newWs;
+      }, delay);
     }
 
-    function connectTo(id) {
-      if (conns[id] || id === myId) return;
-      const conn = peer.connect(id);
-      conns[id] = conn;
-      conn.on("open", () => {
-        conn.send({ type: "join", id: myId, name: "Người dùng " + myId.slice(5) });
-      });
-      conn.on("data", data => {
-        if (data.type === "chat") logChat(data.msg, data.sender, "peer");
-        if (data.type === "join") addUser(data.id, data.name || data.id);
-        if (data.type === "leave") removeUser(data.id);
-        if (data.type === "hostCmd") handleHostCmd(data);
-      });
-      conn.on("close", () => {
-        removeUser(id);
-        delete conns[id];
-        delete peers[id];
+    function initPeer(peerId, initiator = false, signalData = null) {
+      if (peers[peerId]) return;
+      const peer = new SimplePeer({
+        initiator,
+        stream: myStream,
+        config: {
+          iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' },
+            { urls: 'stun:stun2.l.google.com:19302' },
+            { urls: 'turn:openrelay.metered.ca:80', username: 'openrelay.project', credential: 'openrelay' },
+            { urls: 'turn:openrelay.metered.ca:443', username: 'openrelay.project', credential: 'openrelay' }
+          ]
+        }
       });
 
-      if (myStream) {
-        const call = peer.call(id, myStream);
-        call.on("stream", stream => {
-          console.log("Received remote stream for call:", stream.getTracks());
-          addVideo(stream, id);
-        });
-        call.on("close", () => removeUser(id));
-        call.on("error", err => updateStatus("Lỗi cuộc gọi: " + err.message, true));
-        peers[id] = call;
-      }
+      peer.on('signal', (data) => {
+        ws.send(JSON.stringify({ type: 'signal', roomId, userId: peerId, signal: data }));
+      });
+
+      peer.on('stream', (stream) => {
+        console.log(`Received stream from ${peerId}:`, stream.getTracks());
+        addVideo(stream, peerId);
+      });
+
+      peer.on('error', (err) => {
+        updateStatus(`Lỗi kết nối với ${peerId}: ${err.message}`, true);
+        console.error(`Peer error with ${peerId}:`, err);
+        removeUser(peerId);
+      });
+
+      peer.on('close', () => {
+        removeUser(peerId);
+        delete peers[peerId];
+      });
+
+      if (signalData) peer.signal(signalData);
+      peers[peerId] = peer;
+    }
+
+    function connectToHost() {
+      const hostId = roomId.replace("room-", "user-");
+      if (hostId !== myId) initPeer(hostId, true);
     }
 
     function sendMsg() {
@@ -353,11 +430,7 @@
       if (!msg) return;
       const sender = "Bạn";
       logChat(msg, sender, "me");
-      for (let id in conns) {
-        if (conns[id].open) {
-          conns[id].send({ type: "chat", msg, sender });
-        }
-      }
+      ws.send(JSON.stringify({ type: "chat", roomId, msg, sender }));
       document.getElementById("msg").value = "";
     }
 
@@ -400,7 +473,7 @@
 
       video.addEventListener("loadedmetadata", () => {
         video.play().catch(err => {
-          updateStatus("Lỗi phát video: " + err.message, true);
+          updateStatus(`Lỗi phát video cho ${id}: ${err.message}`, true);
           console.error("Video playback error:", err);
         });
       });
@@ -417,8 +490,23 @@
       console.log(`Added video for ${id}, tracks:`, stream.getTracks());
     }
 
+    function addNoStreamPlaceholder(id) {
+      if (document.getElementById("v-" + id)) return;
+      const container = document.createElement("div");
+      container.className = "video-container no-stream";
+      container.id = "v-" + id;
+      container.textContent = usersList[id] || id;
+
+      const label = document.createElement("div");
+      label.className = "video-label";
+      label.textContent = id === myId ? "Bạn (Không có video)" : usersList[id] || id;
+
+      container.appendChild(label);
+      document.getElementById("videos").appendChild(container);
+    }
+
     function toggleMic() {
-      if (!myStream) return;
+      if (!myStream || !myStream.getAudioTracks().length) return;
       micOn = !micOn;
       myStream.getAudioTracks().forEach(track => track.enabled = micOn);
       document.getElementById("micBtn").style.opacity = micOn ? 1 : 0.5;
@@ -426,7 +514,7 @@
     }
 
     function toggleCam() {
-      if (!myStream) return;
+      if (!myStream || !myStream.getVideoTracks().length) return;
       camOn = !camOn;
       myStream.getVideoTracks().forEach(track => track.enabled = camOn);
       document.getElementById("camBtn").style.opacity = camOn ? 1 : 0.5;
@@ -440,18 +528,19 @@
           screenStream = null;
           document.getElementById("shareBtn").textContent = "📺 Share";
           updateStatus("Đã dừng chia sẻ màn hình");
-          // Revert to camera stream
           if (myStream) {
             for (let id in peers) {
-              const sender = peers[id].peerConnection.getSenders().find(s => s.track?.kind === "video");
-              if (sender && myStream.getVideoTracks().length) {
-                sender.replaceTrack(myStream.getVideoTracks()[0]);
+              peers[id].removeStream(screenStream);
+              if (myStream.getVideoTracks().length) {
+                peers[id].addStream(myStream);
               }
             }
-            // Update local video to show camera
             const localVideo = document.getElementById("v-" + myId)?.querySelector("video");
             if (localVideo && myStream.getVideoTracks().length) {
               localVideo.srcObject = myStream;
+            } else if (localVideo) {
+              document.getElementById("v-" + myId).remove();
+              addNoStreamPlaceholder(myId);
             }
           }
           return;
@@ -462,22 +551,41 @@
         document.getElementById("shareBtn").textContent = "🛑 Stop Share";
         updateStatus("Đang chia sẻ màn hình");
 
-        // Update local video to show screen
-        const localVideo = document.getElementById("v-" + myId)?.querySelector("video");
+        const localVideo = document.getElementById("v-" + myId);
         if (localVideo) {
-          localVideo.srcObject = screenStream;
+          localVideo.innerHTML = "";
+          const video = document.createElement("video");
+          video.srcObject = screenStream;
+          video.autoplay = true;
+          video.playsInline = true;
+          video.muted = true;
+          video.style.width = "100%";
+          video.style.height = "100%";
+          video.style.objectFit = "cover";
+
+          const label = document.createElement("div");
+          label.className = "video-label";
+          label.textContent = "Bạn (Chia sẻ màn hình)";
+          localVideo.appendChild(video);
+          localVideo.appendChild(label);
+
+          video.addEventListener("loadedmetadata", () => {
+            video.play().catch(err => {
+              updateStatus("Lỗi phát chia sẻ màn hình: " + err.message, true);
+              console.error("Screen share playback error:", err);
+            });
+          });
         }
 
-        // Replace video track for all peers
         for (let id in peers) {
-          const sender = peers[id].peerConnection.getSenders().find(s => s.track?.kind === "video");
-          if (sender && screenStream.getVideoTracks().length) {
-            sender.replaceTrack(screenStream.getVideoTracks()[0]);
+          peers[id].removeStream(myStream);
+          if (screenStream.getVideoTracks().length) {
+            peers[id].addStream(screenStream);
           }
         }
 
         screenStream.getVideoTracks()[0].onended = () => {
-          shareScreen(); // Auto-stop sharing when user cancels
+          shareScreen();
         };
       } catch (err) {
         updateStatus("Lỗi chia sẻ màn hình: " + err.message, true);
@@ -496,9 +604,12 @@
       if (document.getElementById("v-" + id)) {
         document.getElementById("v-" + id).remove();
       }
-      delete peers[id];
-      delete conns[id];
+      if (peers[id]) {
+        peers[id].destroy();
+        delete peers[id];
+      }
       updateUsers();
+      ws.send(JSON.stringify({ type: "leave", roomId, userId: id }));
     }
 
     function updateUsers() {
@@ -528,9 +639,7 @@
     }
 
     function sendHostCmd(target, cmd) {
-      if (conns[target] && conns[target].open) {
-        conns[target].send({ type: "hostCmd", cmd });
-      }
+      ws.send(JSON.stringify({ type: "hostCmd", roomId, userId: target, cmd }));
     }
 
     function handleHostCmd(data) {
@@ -548,26 +657,17 @@
       }
     }
 
-    function reconnectPeer() {
-      if (peer && peer.disconnected) {
-        peer.reconnect();
-        updateStatus("Đang thử kết nối lại...");
-      }
-    }
-
     window.onbeforeunload = () => {
-      for (let id in conns) {
-        if (conns[id].open) {
-          conns[id].send({ type: "leave", id: myId });
-        }
-      }
+      ws.send(JSON.stringify({ type: "leave", roomId, userId: myId }));
       if (myStream) {
         myStream.getTracks().forEach(track => track.stop());
       }
       if (screenStream) {
         screenStream.getTracks().forEach(track => track.stop());
       }
-      if (peer) peer.destroy();
+      for (let id in peers) {
+        peers[id].destroy();
+      }
     };
 
     // Auto-join room from URL hash
