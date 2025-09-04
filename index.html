@@ -1,683 +1,745 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Cloud Room Pro</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Cloud Room Pro - Giải pháp họp trực tuyến, gọi video nhóm, chat và chia sẻ màn hình nhanh chóng, bảo mật.">
-  <meta name="keywords" content="cloud room, video call, chat trực tuyến, họp online, chia sẻ màn hình, simple-peer">
-  <meta name="author" content="Cloud Room Pro">
-
-  <!-- Open Graph -->
-  <meta property="og:title" content="Cloud Room Pro - Họp trực tuyến thông minh">
-  <meta property="og:description" content="Tạo phòng họp, gọi video, chat và chia sẻ màn hình chỉ trong vài giây.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://khoitongdz.github.io/Pro/">
-  <meta property="og:image" content="https://tse1.mm.bing.net/th/id/OIP.98EeoWyrRcHXvv0Ti90-1wHaQD?pid=Api">
-
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Cloud Room Pro - Họp trực tuyến thông minh">
-  <meta name="twitter:description" content="Gọi video, chat, chia sẻ màn hình dễ dàng và bảo mật.">
-  <meta name="twitter:image" content="https://yourdomain.com/thumbnail.png">
-
-  <link rel="icon" href="/favicon.ico" type="image/x-icon">
-  <script src="https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-  <style>
-    body {
-      margin: 0;
-      font-family: Segoe UI, sans-serif;
-      background: #0f172a;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
-    header {
-      padding: 12px;
-      text-align: center;
-      background: #1e293b;
-    }
-    .main {
-      flex: 1;
-      display: flex;
-      gap: 12px;
-      padding: 12px;
-    }
-    .videos {
-      flex: 3;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 10px;
-      background: #000;
-      border-radius: 12px;
-      padding: 10px;
-      overflow: auto;
-    }
-    video {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-      border-radius: 12px;
-      background: #111;
-      transform: rotateY(0deg);
-    }
-    .sidebar {
-      flex: 1;
-      background: #1e293b;
-      border-radius: 12px;
-      display: flex;
-      flex-direction: column;
-      padding: 12px;
-    }
-    .roomBox {
-      margin-bottom: 12px;
-      display: flex;
-      gap: 6px;
-    }
-    input, button {
-      padding: 8px;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-    }
-    input {
-      flex: 1;
-    }
-    button {
-      background: linear-gradient(135deg, #3b82f6, #06b6d4);
-      color: #fff;
-      cursor: pointer;
-      font-weight: 600;
-      transition: .2s;
-    }
-    button:hover {
-      opacity: .85;
-    }
-    .chatBox {
-      flex: 1;
-      background: #0f172a;
-      border-radius: 8px;
-      padding: 6px;
-      overflow-y: auto;
-      margin: 6px 0;
-    }
-    .msg {
-      margin: 4px 0;
-    }
-    .me {
-      color: #3b82f6;
-    }
-    .peer {
-      color: #06b6d4;
-    }
-    .error {
-      color: #ef4444;
-    }
-    .controls {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      margin-top: 6px;
-    }
-    #qrcode {
-      margin-top: 10px;
-    }
-    .userList {
-      background: #0f172a;
-      border-radius: 8px;
-      padding: 6px;
-      max-height: 120px;
-      overflow-y: auto;
-      margin: 6px 0;
-      font-size: 14px;
-    }
-    .userList div {
-      padding: 4px 0;
-      border-bottom: 1px solid #1e293b;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .spotlight video {
-      width: 100% !important;
-      height: 400px !important;
-    }
-    .status {
-      font-size: 12px;
-      color: #9ca3af;
-      margin-top: 6px;
-    }
-    .video-container {
-      position: relative;
-      width: 100%;
-      height: 200px;
-      background: #111;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      font-size: 14px;
-      text-align: center;
-    }
-    .video-label {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: rgba(0, 0, 0, 0.5);
-      padding: 4px 8px;
-      border-radius: 4px;
-    }
-    .no-stream {
-      background: #222;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 10px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="https://icons.veryicon.com/png/Application/Mavrick/Mail.png">
+    <title>Temp Mail Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+            color: #e2e8f0;
+            overflow-x: hidden;
+            transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
+        }
+        body.light-mode {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            color: #1e293b;
+        }
+        .btn {
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), background-color 0.4s ease-in-out, box-shadow 0.4s ease-in-out;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .btn:hover {
+            transform: scale(1.05) rotate(2deg);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        .btn:active {
+            transform: scale(0.95) rotate(-2deg);
+        }
+        .copy-btn {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            width: 100px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+            font-size: 16px;
+            font-weight: 600;
+            animation: glow 2s infinite alternate ease-in-out;
+        }
+        .copy-btn:hover {
+            animation: pulse 1s infinite ease-in-out, glow 1s infinite alternate ease-in-out;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.8);
+        }
+        .copy-btn:active::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            animation: ripple 0.5s ease-out;
+        }
+        .toast {
+            transition: opacity 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            background: linear-gradient(135deg, #4b5563, #1f2937);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+        }
+        .light-mode .toast {
+            background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+            color: #1e293b;
+        }
+        .toast-hidden {
+            opacity: 0;
+            transform: translateY(-30px) scale(0.9);
+        }
+        .email-row {
+            transition: background-color 0.4s ease-in-out, transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.6s ease-in-out, box-shadow 0.4s ease-in-out;
+            animation: fadeInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            opacity: 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .email-row:hover {
+            background-color: #374151;
+            transform: translateX(8px) scale(1.02);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        .light-mode .email-row {
+            background-color: #f9fafb;
+        }
+        .light-mode .email-row:hover {
+            background-color: #d1d5db;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        .email-content {
+            display: none;
+            max-height: 600px;
+            overflow-y: auto;
+            background: #fff;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: max-height 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .light-mode .email-content {
+            background: #f3f4f6;
+        }
+        .email-content.show {
+            display: block;
+            animation: expandContent 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        .loading-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3b82f6;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+            display: inline-block;
+        }
+        iframe {
+            width: 100%;
+            min-height: 400px;
+            border: none;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: min-height 0.4s ease-in-out;
+        }
+        .light-mode iframe {
+            background: #f3f4f6;
+        }
+        #captcha-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(30, 58, 138, 0.9));
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        #captcha-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #captcha-container {
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            animation: slideUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        #captcha-btn {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s ease-in-out, background 0.3s ease-in-out;
+            position: relative;
+            overflow: hidden;
+        }
+        #captcha-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+        }
+        #captcha-btn:active::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            animation: ripple 0.5s ease-out;
+        }
+        #captcha-icon {
+            animation: bounce 1.5s infinite ease-in-out;
+        }
+        #main-content {
+            opacity: 0;
+            transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        #main-content.visible {
+            opacity: 1;
+            animation: fadeIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(34, 197, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+        @keyframes ripple {
+            to { transform: translate(-50%, -50%) scale(1.2); opacity: 0; }
+        }
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px rgba(34, 197, 94, 0.3); }
+            100% { box-shadow: 0 0 15px rgba(34, 197, 94, 0.6); }
+        }
+        @keyframes expandContent {
+            from { max-height: 0; opacity: 0; }
+            to { max-height: 600px; opacity: 1; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        header, .bg-gray-800 {
+            background: linear-gradient(135deg, #1e293b 0%, #111827 100%);
+            border-radius: 12px;
+            transition: background 0.4s ease-in-out;
+        }
+        .light-mode header, .light-mode .bg-gray-800 {
+            background: linear-gradient(135deg, #e0f2fe 0%, #bfdbfe 100%);
+        }
+        input[readonly] {
+            cursor: default;
+            background: #1f2937;
+            transition: background 0.4s ease-in-out, color 0.4s ease-in-out;
+        }
+        .light-mode input[readonly] {
+            background: #e5e7eb;
+            color: #1e293b;
+        }
+        .mode-toggle {
+            cursor: pointer;
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .mode-toggle:hover {
+            transform: rotate(15deg) scale(1.2);
+        }
+        footer {
+            transition: color 0.4s ease-in-out;
+        }
+    </style>
 </head>
-<body>
-  <header><h2>📱 Cloud Room Pro</h2></header>
-  <div class="main">
-    <div class="videos" id="videos"></div>
-    <div class="sidebar">
-      <div class="roomBox">
-        <button onclick="createRoom()">Tạo phòng</button>
-        <input id="roomId" placeholder="Nhập Room ID"/>
-        <button onclick="joinRoom()">Join</button>
-        <button onclick="retryMediaAccess()" style="background: #ef4444; display: none;" id="retryMediaBtn">Thử lại Camera/Mic</button>
-      </div>
-      <div id="roomInfo"></div>
-      <div class="status" id="status">Đang chờ kết nối...</div>
-      <canvas id="qrcode"></canvas>
-      <div class="userList" id="users"></div>
-      <div class="chatBox" id="chat"></div>
-      <div class="controls">
-        <input id="msg" placeholder="Tin nhắn..."/>
-        <button onclick="sendMsg()">💬 Gửi</button>
-        <button id="micBtn" onclick="toggleMic()" disabled>🎤 Mic</button>
-        <button id="camBtn" onclick="toggleCam()" disabled>📷 Cam</button>
-        <button id="shareBtn" onclick="shareScreen()" disabled>📺 Share</button>
-        <button onclick="toggleLayout()">🖼 Layout</button>
-      </div>
+<body class="min-h-screen flex flex-col items-center">
+    <!-- Captcha Overlay -->
+    <div id="captcha-overlay">
+        <div id="captcha-container">
+            <h2 class="text-3xl font-bold mb-6 text-white">Xác thực bạn là con người</h2>
+            <i id="captcha-icon" class="fas fa-check-circle text-5xl text-green-400 mb-6"></i>
+            <button id="captcha-btn">Click để xác thực</button>
+        </div>
     </div>
-  </div>
 
-  <script>
-    let myStream, roomId, myId, isHost = false;
-    let peers = {}, usersList = {}, micOn = true, camOn = true, layout = "grid", screenStream = null;
-    const ws = new WebSocket('wss://socketsbay.com/wss/v2/2/demo/');
-    let reconnectAttempts = 0, maxReconnectAttempts = 5;
+    <!-- Main Content (Hidden initially) -->
+    <div id="main-content" class="w-full flex flex-col items-center flex-grow">
+        <!-- Header -->
+        <header class="w-full bg-gray-900 bg-opacity-90 backdrop-blur-sm py-4 shadow-lg light-mode:bg-blue-50 light-mode:bg-opacity-90">
+            <div class="max-w-6xl mx-auto flex items-center justify-between px-4 md:px-6">
+                <h1 class="text-3xl font-bold text-white tracking-tight light-mode:text-blue-900">📧 Temp Mail Pro</h1>
+                <div class="flex items-center space-x-4">
+                    <div id="timer" class="text-yellow-300 font-semibold text-lg light-mode:text-yellow-600">⏳ Còn lại: 10:00</div>
+                    <i id="modeToggle" class="fas fa-moon text-white text-xl mode-toggle light-mode:fa-sun light-mode:text-yellow-500"></i>
+                </div>
+            </div>
+        </header>
 
-    function updateStatus(message, isError = donnay) {
-      const statusEl = document.getElementById("status");
-      statusEl.textContent = message;
-      statusEl.className = `status ${isError ? 'error' : ''}`;
-      console.log(`Status: ${message}`);
-      document.getElementById("retryMediaBtn").style.display = isError && message.includes("camera/mic") ? "inline-block" : "none";
-    }
+        <!-- Main Content -->
+        <main class="max-w-6xl w-full mx-auto mt-8 px-4 md:px-6 flex-grow">
+            <!-- Email Card -->
+            <div class="bg-gray-800 rounded-xl shadow-2xl p-6 mb-8 light-mode:bg-white light-mode:shadow-md">
+                <div class="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
+                    <input id="emailDisplay" type="text" value="Đang tạo email..." readonly
+                           class="w-full bg-gray-700 text-white p-4 rounded-lg text-sm font-mono focus:outline-none border border-gray-600 light-mode:bg-gray-200 light-mode:text-gray-900 light-mode:border-gray-300" />
+                    <button id="copyBtn" class="copy-btn btn ml-0 md:ml-2" title="Copy Email">
+                        📋 Copy
+                    </button>
+                </div>
+                <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mt-6">
+                    <button id="refreshBtn" class="btn bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 flex items-center justify-center w-full md:w-auto">
+                        <span id="refreshSpinner" class="loading-spinner hidden mr-2"></span>🔄 Refresh
+                    </button>
+                    <button id="newEmailBtn" class="btn bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 w-full md:w-auto">
+                        ✨ New Email
+                    </button>
+                </div>
+            </div>
 
-    async function retryMediaAccess() {
-      updateStatus("Đang thử truy cập lại camera/mic...");
-      try {
-        myStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        console.log("Local stream obtained:", myStream.getTracks());
-        addVideo(myStream, myId, true);
-        document.getElementById("micBtn").disabled = false;
-        document.getElementById("camBtn").disabled = false;
-        document.getElementById("shareBtn").disabled = false;
-        updateStatus("Đã truy cập camera/mic thành công");
-        for (let id in peers) {
-          peers[id].addStream(myStream);
-        }
-      } catch (err) {
-        updateStatus("Không thể truy cập camera/mic: " + err.message, true);
-        console.error("Media retry error:", err);
-        try {
-          myStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          console.log("Fallback to audio-only stream:", myStream.getTracks());
-          addVideo(myStream, myId, true);
-          document.getElementById("micBtn").disabled = false;
-          updateStatus("Không có camera, chỉ sử dụng mic");
-          for (let id in peers) {
-            peers[id].addStream(myStream);
-          }
-        } catch (audioErr) {
-          updateStatus("Không thể truy cập mic: " + audioErr.message, true);
-          console.error("Audio fallback error:", audioErr);
-          addNoStreamPlaceholder(myId);
-        }
-      }
-    }
+            <!-- Inbox -->
+            <div class="bg-gray-800 rounded-xl shadow-2xl p-6 light-mode:bg-white light-mode:shadow-md">
+                <h2 class="text-xl font-semibold mb-4 text-white light-mode:text-gray-900">📬 Inbox</h2>
+                <div id="inboxArea" class="space-y-4 max-h-96 overflow-y-auto">
+                    <div id="loading" class="text-center text-gray-400">Đang tải...</div>
+                </div>
+            </div>
+        </main>
 
-    function createRoom() {
-      if (location.protocol !== 'https:') {
-        updateStatus("Ứng dụng yêu cầu HTTPS để truy cập camera/mic. Vui lòng chạy trên HTTPS.", true);
-        return;
-      }
-      roomId = "room-" + Math.random().toString(36).substr(2, 6);
-      isHost = true;
-      document.getElementById("roomId").value = roomId;
-      document.getElementById("roomInfo").innerHTML = `Phòng: <b>${roomId}</b> (Chủ phòng)`;
-      QRCode.toCanvas(document.getElementById("qrcode"), window.location.href + "#" + roomId, { width: 100 }, err => {
-        if (err) updateStatus("Lỗi tạo QR code: " + err.message, true);
-      });
-      updateStatus("Đã tạo phòng, đang khởi tạo kết nối...");
-      initWebRTC();
-    }
+        <!-- Footer -->
+        <footer class="w-full py-4 text-center text-gray-500 text-sm light-mode:text-gray-600">
+            © 2025 Temp Mail Pro. All rights reserved.
+        </footer>
 
-    function joinRoom() {
-      if (location.protocol !== 'https:') {
-        updateStatus("Ứng dụng yêu cầu HTTPS để truy cập camera/mic. Vui lòng chạy trên HTTPS.", true);
-        return;
-      }
-      roomId = document.getElementById("roomId").value.trim();
-      if (!roomId.match(/^room-[a-z0-9]{6}$/)) {
-        updateStatus("Room ID không hợp lệ", true);
-        return;
-      }
-      document.getElementById("roomInfo").innerHTML = `Join phòng: <b>${roomId}</b>`;
-      QRCode.toCanvas(document.getElementById("qrcode"), window.location.href + "#" + roomId, { width: 100 }, err => {
-        if (err) updateStatus("Lỗi tạo QR code: " + err.message, true);
-      });
-      updateStatus("Đang tham gia phòng...");
-      initWebRTC();
-    }
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed top-4 bg-gray-900 text-white px-5 py-3 rounded-lg shadow-lg toast-hidden light-mode:bg-white light-mode:text-gray-900">
+            Notification
+        </div>
+    </div>
 
-    async function initWebRTC() {
-      try {
-        myId = "user-" + Math.random().toString(36).substr(2, 6);
-        try {
-          myStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-          console.log("Local stream obtained:", myStream.getTracks());
-          addVideo(myStream, myId, true);
-          document.getElementById("micBtn").disabled = false;
-          document.getElementById("camBtn").disabled = false;
-          document.getElementById("shareBtn").disabled = false;
-          addUser(myId, "Bạn");
-          updateStatus("Đã kết nối, chờ các thành viên khác...");
-        } catch (err) {
-          updateStatus("Không thể truy cập camera/mic: " + err.message, true);
-          console.error("Media error:", err);
-          try {
-            myStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            console.log("Fallback to audio-only stream:", myStream.getTracks());
-            addVideo(myStream, myId, true);
-            document.getElementById("micBtn").disabled = false;
-            updateStatus("Không có camera, chỉ sử dụng mic");
-            addUser(myId, "Bạn");
-          } catch (audioErr) {
-            updateStatus("Không thể truy cập mic: " + audioErr.message + ". Bạn có thể tham gia để chat và xem video.", true);
-            console.error("Audio fallback error:", audioErr);
-            addNoStreamPlaceholder(myId);
-            addUser(myId, "Bạn");
-          }
-        }
+    <script>
+        // Captcha Logic
+        const captchaOverlay = document.getElementById('captcha-overlay');
+        const mainContent = document.getElementById('main-content');
+        const captchaBtn = document.getElementById('captcha-btn');
 
-        ws.onopen = () => {
-          console.log("WebSocket connected");
-          updateStatus("Đã kết nối với WebSocket server");
-          ws.send(JSON.stringify({ type: "join", roomId, userId: myId, name: "Người dùng " + myId.slice(5) }));
-          if (!isHost) connectToHost();
-        };
-
-        ws.onmessage = (event) => {
-          const data = JSON.parse(event.data);
-          if (data.roomId !== roomId) return;
-          if (data.type === "join" && isHost) {
-            addUser(data.userId, data.name);
-            initPeer(data.userId, true);
-          }
-          if (data.type === "signal") {
-            if (peers[data.userId]) {
-              peers[data.userId].signal(data.signal);
-            } else {
-              initPeer(data.userId, false, data.signal);
-            }
-          }
-          if (data.type === "chat") logChat(data.msg, data.sender, "peer");
-          if (data.type === "leave") removeUser(data.userId);
-          if (data.type === "hostCmd") handleHostCmd(data);
-        };
-
-        ws.onerror = (err) => {
-          updateStatus("Lỗi WebSocket: Kiểm tra kết nối mạng.", true);
-          console.error("WebSocket error:", err);
-          scheduleReconnect();
-        };
-
-        ws.onclose = () => {
-          updateStatus("Mất kết nối WebSocket, đang thử kết nối lại...", true);
-          console.warn("WebSocket disconnected");
-          scheduleReconnect();
-        };
-
-      } catch (err) {
-        updateStatus("Lỗi khởi tạo kết nối: " + err.message, true);
-        console.error("WebRTC init error:", err);
-      }
-    }
-
-    function scheduleReconnect() {
-      if (reconnectAttempts >= maxReconnectAttempts) {
-        updateStatus("Không thể kết nối lại WebSocket sau nhiều lần thử.", true);
-        return;
-      }
-      const delay = Math.min(Math.pow(2, reconnectAttempts) * 1000, 30000);
-      reconnectAttempts++;
-      setTimeout(() => {
-        updateStatus(`Đang thử kết nối lại WebSocket (lần ${reconnectAttempts}/${maxReconnectAttempts})...`);
-        const newWs = new WebSocket('wss://socketsbay.com/wss/v2/2/demo/');
-        newWs.onopen = ws.onopen;
-        newWs.onmessage = ws.onmessage;
-        newWs.onerror = ws.onerror;
-        newWs.onclose = ws.onclose;
-        ws = newWs;
-      }, delay);
-    }
-
-    function initPeer(peerId, initiator = false, signalData = null) {
-      if (peers[peerId]) return;
-      const peer = new SimplePeer({
-        initiator,
-        stream: myStream,
-        config: {
-          iceServers: [
-            { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:stun1.l.google.com:19302' },
-            { urls: 'stun:stun2.l.google.com:19302' },
-            { urls: 'turn:openrelay.metered.ca:80', username: 'openrelay.project', credential: 'openrelay' },
-            { urls: 'turn:openrelay.metered.ca:443', username: 'openrelay.project', credential: 'openrelay' }
-          ]
-        }
-      });
-
-      peer.on('signal', (data) => {
-        ws.send(JSON.stringify({ type: 'signal', roomId, userId: peerId, signal: data }));
-      });
-
-      peer.on('stream', (stream) => {
-        console.log(`Received stream from ${peerId}:`, stream.getTracks());
-        addVideo(stream, peerId);
-      });
-
-      peer.on('error', (err) => {
-        updateStatus(`Lỗi kết nối với ${peerId}: ${err.message}`, true);
-        console.error(`Peer error with ${peerId}:`, err);
-        removeUser(peerId);
-      });
-
-      peer.on('close', () => {
-        removeUser(peerId);
-        delete peers[peerId];
-      });
-
-      if (signalData) peer.signal(signalData);
-      peers[peerId] = peer;
-    }
-
-    function connectToHost() {
-      const hostId = roomId.replace("room-", "user-");
-      if (hostId !== myId) initPeer(hostId, true);
-    }
-
-    function sendMsg() {
-      const msg = document.getElementById("msg").value.trim();
-      if (!msg) return;
-      const sender = "Bạn";
-      logChat(msg, sender, "me");
-      ws.send(JSON.stringify({ type: "chat", roomId, msg, sender }));
-      document.getElementById("msg").value = "";
-    }
-
-    function logChat(msg, sender, who) {
-      const div = document.createElement("div");
-      div.className = `msg ${who}`;
-      div.textContent = `${sender}: ${msg}`;
-      document.getElementById("chat").appendChild(div);
-      document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
-    }
-
-    function addVideo(stream, id, self = false) {
-      if (document.getElementById("v-" + id)) return;
-      if (!stream.getVideoTracks().length && !self) {
-        updateStatus(`Stream từ ${id} không có video`, true);
-        console.warn(`No video tracks in stream for ${id}`);
-        return;
-      }
-
-      const container = document.createElement("div");
-      container.className = "video-container";
-      container.id = "v-" + id;
-
-      const video = document.createElement("video");
-      video.srcObject = stream;
-      video.autoplay = true;
-      video.playsInline = true;
-      if (self) video.muted = true;
-      video.style.width = "100%";
-      video.style.height = "100%";
-      video.style.objectFit = "cover";
-
-      const label = document.createElement("div");
-      label.className = "video-label";
-      label.textContent = self ? "Bạn" : usersList[id] || id;
-
-      container.appendChild(video);
-      container.appendChild(label);
-      document.getElementById("videos").appendChild(container);
-
-      video.addEventListener("loadedmetadata", () => {
-        video.play().catch(err => {
-          updateStatus(`Lỗi phát video cho ${id}: ${err.message}`, true);
-          console.error("Video playback error:", err);
+        captchaBtn.addEventListener('click', () => {
+            captchaOverlay.classList.add('hidden');
+            mainContent.classList.add('visible');
         });
-      });
 
-      stream.getTracks().forEach(track => {
-        track.onended = () => {
-          if (document.getElementById("v-" + id)) {
-            document.getElementById("v-" + id).remove();
-            updateStatus(`Stream từ ${id} đã kết thúc`);
-          }
-        };
-      });
+        // Theme toggle
+        const body = document.body;
+        const modeToggle = document.getElementById('modeToggle');
+        modeToggle.addEventListener('click', () => {
+            body.classList.toggle('light-mode');
+            modeToggle.classList.toggle('fa-moon');
+            modeToggle.classList.toggle('fa-sun');
+            modeToggle.classList.toggle('text-white');
+            modeToggle.classList.toggle('text-yellow-500');
+        });
 
-      console.log(`Added video for ${id}, tracks:`, stream.getTracks());
-    }
+        const MAILTM_BASE = "https://api.mail.tm";
+        const SECMAIL_BASE = "https://www.1secmail.com/api/v1/";
+        const GUERRILLA_BASE = "https://api.guerrillamail.com/ajax.php";
 
-    function addNoStreamPlaceholder(id) {
-      if (document.getElementById("v-" + id)) return;
-      const container = document.createElement("div");
-      container.className = "video-container no-stream";
-      container.id = "v-" + id;
-      container.textContent = usersList[id] || id;
+        function genPassword(length = 12) {
+            const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            return Array(length).fill().map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
+        }
 
-      const label = document.createElement("div");
-      label.className = "video-label";
-      label.textContent = id === myId ? "Bạn (Không có video)" : usersList[id] || id;
+        function genUsername(length = 8) {
+            const chars = 'abcdefghijklmnopqrstuvwxyz';
+            return Array(length).fill().map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
+        }
 
-      container.appendChild(label);
-      document.getElementById("videos").appendChild(container);
-    }
-
-    function toggleMic() {
-      if (!myStream || !myStream.getAudioTracks().length) return;
-      micOn = !micOn;
-      myStream.getAudioTracks().forEach(track => track.enabled = micOn);
-      document.getElementById("micBtn").style.opacity = micOn ? 1 : 0.5;
-      updateStatus("Mic " + (micOn ? "bật" : "tắt"));
-    }
-
-    function toggleCam() {
-      if (!myStream || !myStream.getVideoTracks().length) return;
-      camOn = !camOn;
-      myStream.getVideoTracks().forEach(track => track.enabled = camOn);
-      document.getElementById("camBtn").style.opacity = camOn ? 1 : 0.5;
-      updateStatus("Camera " + (camOn ? "bật" : "tắt"));
-    }
-
-    async function shareScreen() {
-      try {
-        if (screenStream) {
-          screenStream.getTracks().forEach(track => track.stop());
-          screenStream = null;
-          document.getElementById("shareBtn").textContent = "📺 Share";
-          updateStatus("Đã dừng chia sẻ màn hình");
-          if (myStream) {
-            for (let id in peers) {
-              peers[id].removeStream(screenStream);
-              if (myStream.getVideoTracks().length) {
-                peers[id].addStream(myStream);
-              }
+        function sanitizeHTML(html) {
+            const dangerousAttrs = /on\w+="[^"]*"/gi;
+            const scripts = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
+            const iframes = /<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi;
+            const styles = /<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi;
+            const links = /<link\b[^<]*(?:(?!<\/link>)<[^<]*)*<\/link>/gi;
+            let clean = html.replace(scripts, '')
+                            .replace(iframes, '')
+                            .replace(styles, '')
+                            .replace(links, '')
+                            .replace(dangerousAttrs, '')
+                            .replace(/javascript:/gi, '');
+            if (typeof DOMParser !== 'undefined') {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(clean, 'text/html');
+                return doc.body.innerHTML;
             }
-            const localVideo = document.getElementById("v-" + myId)?.querySelector("video");
-            if (localVideo && myStream.getVideoTracks().length) {
-              localVideo.srcObject = myStream;
-            } else if (localVideo) {
-              document.getElementById("v-" + myId).remove();
-              addNoStreamPlaceholder(myId);
+            return clean;
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.remove('toast-hidden');
+            setTimeout(() => toast.classList.add('toast-hidden'), 3000);
+        }
+
+        class TempMailApp {
+            constructor() {
+                this.email = '';
+                this.provider = '';
+                this.token = null;
+                this.username = null;
+                this.domain = null;
+                this.sid_token = null;
+                this.expireTime = 0;
+                this.oldMailIds = new Set();
+                this.emailDisplay = document.getElementById('emailDisplay');
+                this.toast = document.getElementById('toast');
+                this.inboxArea = document.getElementById('inboxArea');
+                this.timerLabel = document.getElementById('timer');
+                this.refreshSpinner = document.getElementById('refreshSpinner');
+                document.getElementById('copyBtn').addEventListener('click', () => this.copyEmail());
+                document.getElementById('refreshBtn').addEventListener('click', () => {
+                    if (confirm('Xác nhận làm mới hòm thư?')) this.refreshInbox();
+                });
+                document.getElementById('newEmailBtn').addEventListener('click', () => {
+                    if (confirm('Xác nhận tạo email mới? Email hiện tại sẽ bị xóa.')) this.newEmail();
+                });
+                this.newEmail();
             }
-          }
-          return;
+
+            showToast(message) {
+                showToast(message);
+            }
+
+            async newEmail() {
+                this.inboxArea.innerHTML = '<div id="loading" class="text-center text-gray-400">Đang tải...</div>';
+                this.refreshSpinner.classList.remove('hidden');
+                let acc = await this.createMailtm();
+                if (acc) {
+                    this.provider = 'mailtm';
+                    this.email = acc.address;
+                    this.token = acc.token;
+                    this.username = null;
+                    this.domain = null;
+                    this.sid_token = null;
+                } else {
+                    acc = await this.create1sec();
+                    if (acc) {
+                        this.provider = '1sec';
+                        this.email = acc.address;
+                        this.username = acc.username;
+                        this.domain = acc.domain;
+                        this.token = null;
+                        this.sid_token = null;
+                    } else {
+                        acc = await this.createGuerrilla();
+                        if (acc) {
+                            this.provider = 'guerrilla';
+                            this.email = acc.address;
+                            this.sid_token = acc.sid_token;
+                            this.username = null;
+                            this.domain = null;
+                            this.token = null;
+                        } else {
+                            this.showToast('❌ Không tạo được email từ bất kỳ API nào!');
+                            this.inboxArea.innerHTML = '<div class="text-center text-gray-400">Không thể tạo email.</div>';
+                            this.refreshSpinner.classList.add('hidden');
+                            return;
+                        }
+                    }
+                }
+
+                this.expireTime = Date.now() + 600000;
+                this.emailDisplay.value = this.email;
+                this.inboxArea.innerHTML = '<div class="text-center text-gray-400">📭 Chưa có thư...</div>';
+                this.oldMailIds.clear();
+                this.updateTimer();
+                this.autoRefresh();
+                this.showToast(`✅ Email mới: ${this.email}`);
+                this.refreshSpinner.classList.add('hidden');
+            }
+
+            async createMailtm() {
+                try {
+                    const domainsRes = await fetch(`${MAILTM_BASE}/domains`);
+                    if (!domainsRes.ok) return null;
+                    const domains = (await domainsRes.json())['hydra:member'];
+                    if (!domains || !domains.length) return null;
+                    const domain = domains[0].domain;
+                    const username = genUsername();
+                    const address = `${username}@${domain}`;
+                    const password = genPassword();
+
+                    const data = { address, password };
+                    const createRes = await fetch(`${MAILTM_BASE}/accounts`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    if (!createRes.ok) return null;
+
+                    const tokenRes = await fetch(`${MAILTM_BASE}/token`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    if (!tokenRes.ok) return null;
+                    const tokenData = await tokenRes.json();
+                    if (!tokenData.token) return null;
+                    return { provider: 'mailtm', address, password, token: tokenData.token };
+                } catch (e) {
+                    console.error('Error creating Mail.tm account:', e);
+                    return null;
+                }
+            }
+
+            async create1sec() {
+                try {
+                    const res = await fetch(`${SECMAIL_BASE}?action=genRandomMailbox&count=1`);
+                    if (!res.ok) return null;
+                    const addresses = await res.json();
+                    if (!addresses || !addresses.length) return null;
+                    const address = addresses[0];
+                    const [username, domain] = address.split('@');
+                    return { provider: '1sec', address, username, domain };
+                } catch (e) {
+                    console.error('Error creating 1secmail account:', e);
+                    return null;
+                }
+            }
+
+            async createGuerrilla() {
+                try {
+                    const res = await fetch(`${GUERRILLA_BASE}?f=get_email_address`);
+                    if (!res.ok) return null;
+                    const data = await res.json();
+                    if (!data.email_addr || !data.sid_token) return null;
+                    return { provider: 'guerrilla', address: data.email_addr, sid_token: data.sid_token };
+                } catch (e) {
+                    console.error('Error creating GuerrillaMail account:', e);
+                    return null;
+                }
+            }
+
+            async deleteMailtm(msgId) {
+                try {
+                    const res = await fetch(`${MAILTM_BASE}/messages/${msgId}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${this.token}` }
+                    });
+                    if (!res.ok) throw new Error('Delete failed');
+                    this.showToast('🗑️ Đã xóa email!');
+                    this.refreshInbox();
+                } catch (e) {
+                    console.error('Error deleting Mail.tm message:', e);
+                    this.showToast('❌ Không thể xóa email!');
+                }
+            }
+
+            async getMailtmInbox() {
+                try {
+                    const res = await fetch(`${MAILTM_BASE}/messages`, {
+                        headers: { 'Authorization': `Bearer ${this.token}` }
+                    });
+                    if (!res.ok) return [];
+                    return (await res.json())['hydra:member'] || [];
+                } catch (e) {
+                    console.error('Error fetching Mail.tm inbox:', e);
+                    return [];
+                }
+            }
+
+            async readMailtm(msgId) {
+                try {
+                    const res = await fetch(`${MAILTM_BASE}/messages/${msgId}`, {
+                        headers: { 'Authorization': `Bearer ${this.token}` }
+                    });
+                    if (!res.ok) return {};
+                    return await res.json();
+                } catch (e) {
+                    console.error('Error reading Mail.tm message:', e);
+                    return {};
+                }
+            }
+
+            async get1secInbox() {
+                try {
+                    const res = await fetch(`${SECMAIL_BASE}?action=getMessages&login=${this.username}&domain=${this.domain}`);
+                    if (!res.ok) return [];
+                    return await res.json();
+                } catch (e) {
+                    console.error('Error fetching 1secmail inbox:', e);
+                    return [];
+                }
+            }
+
+            async read1sec(msgId) {
+                try {
+                    const res = await fetch(`${SECMAIL_BASE}?action=readMessage&login=${this.username}&domain=${this.domain}&id=${msgId}`);
+                    if (!res.ok) return {};
+                    return await res.json();
+                } catch (e) {
+                    console.error('Error reading 1secmail message:', e);
+                    return {};
+                }
+            }
+
+            async getGuerrillaInbox() {
+                try {
+                    const res = await fetch(`${GUERRILLA_BASE}?f=get_email_list&offset=0&sid_token=${this.sid_token}`);
+                    if (!res.ok) return [];
+                    return (await res.json()).list || [];
+                } catch (e) {
+                    console.error('Error fetching GuerrillaMail inbox:', e);
+                    return [];
+                }
+            }
+
+            async readGuerrilla(mailId) {
+                try {
+                    const res = await fetch(`${GUERRILLA_BASE}?f=fetch_email&sid_token=${this.sid_token}&email_id=${mailId}`);
+                    if (!res.ok) return {};
+                    return await res.json();
+                } catch (e) {
+                    console.error('Error reading GuerrillaMail message:', e);
+                    return {};
+                }
+            }
+
+            copyEmail() {
+                navigator.clipboard.writeText(this.email).then(() => {
+                    this.showToast(`📋 Đã copy email: ${this.email}`);
+                }).catch((e) => {
+                    console.error('Error copying email:', e);
+                    this.showToast('❌ Không thể copy email!');
+                });
+            }
+
+            async refreshInbox() {
+                if (Date.now() > this.expireTime) {
+                    this.inboxArea.innerHTML = '<div class="text-center text-gray-400">⛔ Email đã hết hạn (10 phút).</div>';
+                    return;
+                }
+
+                this.refreshSpinner.classList.remove('hidden');
+                this.inboxArea.innerHTML = '<div id="loading" class="text-center text-gray-400">Đang tải...</div>';
+                try {
+                    let mails = [];
+                    if (this.provider === 'mailtm') {
+                        const inbox = await this.getMailtmInbox();
+                        mails = await Promise.all(inbox.map(async m => [
+                            m.id,
+                            m.from?.address || 'Unknown',
+                            m.subject || 'No subject',
+                            await this.readMailtm(m.id),
+                            m.createdAt
+                        ]));
+                    } else if (this.provider === '1sec') {
+                        const inbox = await this.get1secInbox();
+                        mails = await Promise.all(inbox.map(async m => [
+                            m.id,
+                            m.from || 'Unknown',
+                            m.subject || 'No subject',
+                            await this.read1sec(m.id),
+                            m.date
+                        ]));
+                    } else if (this.provider === 'guerrilla') {
+                        const inbox = await this.getGuerrillaInbox();
+                        mails = await Promise.all(inbox.map(async m => [
+                            m.mail_id,
+                            m.mail_from || 'Unknown',
+                            m.mail_subject || 'No subject',
+                            await this.readGuerrilla(m.mail_id),
+                            m.mail_date
+                        ]));
+                    }
+
+                    this.inboxArea.innerHTML = '';
+                    let newMailFound = false;
+
+                    for (const [mid, sender, subject, msg, date] of mails) {
+                        let htmlContent = msg.htmlBody || msg.html || msg.mail_body || '';
+                        if (Array.isArray(htmlContent)) {
+                            htmlContent = htmlContent.join('');
+                        }
+                        let bodyHTML = htmlContent;
+                        if (!bodyHTML) {
+                            const textContent = msg.text || msg.body || msg.textBody || msg.mail_excerpt || 'No content available';
+                            bodyHTML = textContent.replace(/\n/g, '<br>');
+                        }
+                        const sanitizedHTML = sanitizeHTML(bodyHTML);
+                        const emailDiv = document.createElement('div');
+                        emailDiv.className = 'email-row bg-gray-700 rounded-lg p-4 light-mode:bg-gray-100';
+                        emailDiv.innerHTML = `
+                            <div class="flex justify-between items-center cursor-pointer" onclick="this.nextElementSibling.classList.toggle('show');">
+                                <div>
+                                    <p class="font-semibold text-white light-mode:text-gray-900">👤 ${sender}</p>
+                                    <p class="text-gray-300 light-mode:text-gray-600">📌 ${subject}</p>
+                                    <p class="text-gray-400 text-sm light-mode:text-gray-500">🕒 ${new Date(date).toLocaleString()}</p>
+                                </div>
+                                <span class="text-gray-400 light-mode:text-gray-500">▼</span>
+                            </div>
+                            <div class="email-content mt-3">
+                                <iframe sandbox="allow-same-origin allow-scripts" srcdoc="${sanitizedHTML.replace(/"/g, '&quot;')}"></iframe>
+                                ${this.provider === 'mailtm' ? `<button class="btn bg-red-500 text-white px-4 py-2 mt-3 rounded-lg hover:bg-red-600" onclick="app.deleteMailtm('${mid}')">🗑️ Delete</button>` : ''}
+                            </div>
+                        `;
+                        this.inboxArea.appendChild(emailDiv);
+
+                        if (!this.oldMailIds.has(mid.toString())) {
+                            newMailFound = true;
+                        }
+                    }
+
+                    const currentIds = new Set(mails.map(m => m[0].toString()));
+                    if (newMailFound) {
+                        this.showToast('🔔 Bạn có thư mới!');
+                    }
+                    this.oldMailIds = currentIds;
+
+                    if (!mails.length) {
+                        this.inboxArea.innerHTML = '<div class="text-center text-gray-400">📭 Chưa có thư...</div>';
+                    }
+                } catch (e) {
+                    console.error('Error during inbox refresh:', e);
+                    this.showToast('❌ Lỗi khi làm mới hòm thư!');
+                    this.inboxArea.innerHTML = '<div class="text-center text-gray-400">❌ Lỗi tải thư, thử lại sau.</div>';
+                } finally {
+                    this.refreshSpinner.classList.add('hidden');
+                }
+            }
+
+            autoRefresh() {
+                this.refreshInbox();
+                setInterval(() => this.refreshInbox(), 10000);
+            }
+
+            updateTimer() {
+                const remaining = Math.max(0, Math.floor((this.expireTime - Date.now()) / 1000));
+                if (remaining > 0) {
+                    const mins = Math.floor(remaining / 60);
+                    const secs = remaining % 60;
+                    this.timerLabel.textContent = `⏳ Còn lại: ${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                    setTimeout(() => this.updateTimer(), 1000);
+                } else {
+                    this.timerLabel.textContent = '⛔ Email đã hết hạn!';
+                    this.emailDisplay.value = 'HẾT HẠN';
+                    this.inboxArea.innerHTML = '<div class="text-center text-gray-400">⛔ Email hết hạn, bấm "✨ New Email" để tạo lại.</div>';
+                }
+            }
         }
 
-        screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-        console.log("Screen stream obtained:", screenStream.getTracks());
-        document.getElementById("shareBtn").textContent = "🛑 Stop Share";
-        updateStatus("Đang chia sẻ màn hình");
-
-        const localVideo = document.getElementById("v-" + myId);
-        if (localVideo) {
-          localVideo.innerHTML = "";
-          const video = document.createElement("video");
-          video.srcObject = screenStream;
-          video.autoplay = true;
-          video.playsInline = true;
-          video.muted = true;
-          video.style.width = "100%";
-          video.style.height = "100%";
-          video.style.objectFit = "cover";
-
-          const label = document.createElement("div");
-          label.className = "video-label";
-          label.textContent = "Bạn (Chia sẻ màn hình)";
-          localVideo.appendChild(video);
-          localVideo.appendChild(label);
-
-          video.addEventListener("loadedmetadata", () => {
-            video.play().catch(err => {
-              updateStatus("Lỗi phát chia sẻ màn hình: " + err.message, true);
-              console.error("Screen share playback error:", err);
-            });
-          });
-        }
-
-        for (let id in peers) {
-          peers[id].removeStream(myStream);
-          if (screenStream.getVideoTracks().length) {
-            peers[id].addStream(screenStream);
-          }
-        }
-
-        screenStream.getVideoTracks()[0].onended = () => {
-          shareScreen();
-        };
-      } catch (err) {
-        updateStatus("Lỗi chia sẻ màn hình: " + err.message, true);
-        console.error("Screen sharing error:", err);
-      }
-    }
-
-    function addUser(id, name = id) {
-      if (usersList[id]) return;
-      usersList[id] = name;
-      updateUsers();
-    }
-
-    function removeUser(id) {
-      delete usersList[id];
-      if (document.getElementById("v-" + id)) {
-        document.getElementById("v-" + id).remove();
-      }
-      if (peers[id]) {
-        peers[id].destroy();
-        delete peers[id];
-      }
-      updateUsers();
-      ws.send(JSON.stringify({ type: "leave", roomId, userId: id }));
-    }
-
-    function updateUsers() {
-      const box = document.getElementById("users");
-      box.innerHTML = "<b>👥 Thành viên:</b><br>";
-      Object.keys(usersList).forEach(id => {
-        const row = document.createElement("div");
-        row.innerHTML = `• ${usersList[id]}`;
-        if (isHost && id !== myId) {
-          const controls = document.createElement("span");
-          controls.innerHTML = ` <button onclick="sendHostCmd('${id}', 'mute')">🔇</button> <button onclick="sendHostCmd('${id}', 'cam')">📵</button>`;
-          row.appendChild(controls);
-        }
-        box.appendChild(row);
-      });
-    }
-
-    function toggleLayout() {
-      const videos = document.getElementById("videos");
-      if (layout === "grid") {
-        layout = "spotlight";
-        videos.classList.add("spotlight");
-      } else {
-        layout = "grid";
-        videos.classList.remove("spotlight");
-      }
-    }
-
-    function sendHostCmd(target, cmd) {
-      ws.send(JSON.stringify({ type: "hostCmd", roomId, userId: target, cmd }));
-    }
-
-    function handleHostCmd(data) {
-      if (data.cmd === "mute" && myStream) {
-        myStream.getAudioTracks().forEach(track => track.enabled = false);
-        micOn = false;
-        document.getElementById("micBtn").style.opacity = 0.5;
-        updateStatus("Chủ phòng tắt mic của bạn");
-      }
-      if (data.cmd === "cam" && myStream) {
-        myStream.getVideoTracks().forEach(track => track.enabled = false);
-        camOn = false;
-        document.getElementById("camBtn").style.opacity = 0.5;
-        updateStatus("Chủ phòng tắt camera của bạn");
-      }
-    }
-
-    window.onbeforeunload = () => {
-      ws.send(JSON.stringify({ type: "leave", roomId, userId: myId }));
-      if (myStream) {
-        myStream.getTracks().forEach(track => track.stop());
-      }
-      if (screenStream) {
-        screenStream.getTracks().forEach(track => track.stop());
-      }
-      for (let id in peers) {
-        peers[id].destroy();
-      }
-    };
-
-    // Auto-join room from URL hash
-    if (window.location.hash) {
-      const hashRoomId = window.location.hash.slice(1);
-      if (hashRoomId.match(/^room-[a-z0-9]{6}$/)) {
-        document.getElementById("roomId").value = hashRoomId;
-        joinRoom();
-      }
-    }
-  </script>
+        const app = new TempMailApp();
+    </script>
 </body>
 </html>
