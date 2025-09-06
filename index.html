@@ -1,1 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="https://icons.veryicon.com/png/Application/Mavrick/Mail.png">
+    <title>Temp Mail Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #2b2d42 0%, #1e1f33 100%);
+            color: #f1f5f9;
+            overflow-x: hidden;
+            transition: all 0.5s ease-in-out;
+            background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.1) 1px, transparent 0);
+            background-size: 30px 30px;
+        }
+        body.light-mode {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #1e293b;
+            background-image: radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.05) 1px, transparent 0);
+        }
+        .btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 0.4s ease-out;
+        }
+        .btn:hover::before {
+            transform: translate(-50%, -50%) scale(1);
+        }
+        .copy-btn {
+            background: linear-gradient(135deg, #34d399, #10b981);
+            width: 110px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-weight: 500;
+            animation: glow 2s infinite alternate ease-in-out;
+        }
+        .copy-btn:hover {
+            animation: pulse 1s infinite ease-in-out;
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.7);
+        }
+        .toast {
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(135deg, #4b5563, #1e293b);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 1rem 2.5rem;
+            font-weight: 500;
+        }
+        .light-mode .toast {
+            background: linear-gradient(135deg, #ffffff, #e5e7eb);
+            color: #1e293b;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+        .toast-hidden {
+            opacity: 0;
+            transform: translateY(-40px) scale(0.95);
+        }
+        .email-row {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: fadeInUp 0.6s ease-out forwards;
+            opacity: 0;
+            background: #2d3748;
+            border-radius: 12px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.2);
+        }
+        .email-row:hover {
+            background: #374151;
+            transform: translateY(-4px);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+        }
+        .light-mode .email-row {
+            background: #ffffff;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+        }
+        .light-mode .email-row:hover {
+            background: #f3f4f6;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+        }
+        .email-content {
+            display: none;
+            max-height: 700px;
+            overflow-y: auto;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .light-mode .email-content {
+            background: #f8fafc;
+        }
+        .email-content.show {
+            display: block;
+            animation: expandContent 0.5s ease-out forwards;
+        }
+        .loading-spinner {
+            border: 5px solid #e5e7eb;
+            border-top: 5px solid #3b82f6;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            animation: spin 1s ease-in-out infinite;
+        }
+        iframe {
+            width: 100%;
+            min-height: 450px;
+            border: none;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.4s ease-in-out;
+        }
+        .light-mode iframe {
+            background: #f8fafc;
+        }
+        #captcha-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, rgba(17, 24, 39, 0.95), rgba(43, 45, 66, 0.95));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.5s ease-in-out;
+            backdrop-filter: blur(8px);
+        }
+        .light-mode #captcha-overlay {
+            background: linear-gradient(135deg, rgba(229, 231, 235, 0.95), rgba(241, 245, 249, 0.95));
+        }
+        #captcha-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #captcha-container {
+            background: linear-gradient(135deg, rgba(31, 41, 55, 0.9), rgba(17, 24, 39, 0.9));
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            animation: slideUp 0.5s ease-out;
+            max-width: 450px;
+            width: 95%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .light-mode #captcha-container {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(241, 245, 249, 0.95));
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        #captcha-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #f1f5f9;
+            margin-bottom: 2rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .light-mode #captcha-title {
+            color: #1e293b;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        #captcha-checkbox {
+            width: 80px;
+            height: 80px;
+            margin: 2rem auto;
+            background: linear-gradient(135deg, #ffffff, #e5e7eb);
+            border: 2px solid #4b7289;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .light-mode #captcha-checkbox {
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border: 2px solid #6b7280;
+        }
+        #captcha-checkbox:hover {
+            transform: scale(1.1);
+            border-color: #60a5fa;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+        }
+        #captcha-checkbox.checked {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-color: #10b981;
+            animation: checkBounce 0.4s ease-in-out;
+        }
+        #captcha-checkbox.checked #captcha-icon {
+            color: #ffffff;
+            opacity: 1;
+            transform: scale(1);
+        }
+        #captcha-icon {
+            font-size: 2.5rem;
+            color: #1e293b;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .light-mode #captcha-icon {
+            color: #1e293b;
+        }
+        #captcha-btn {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: #ffffff;
+            padding: 1rem 3rem;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+            margin-top: 2rem;
+            opacity: 0.5;
+            pointer-events: none;
+            position: relative;
+            overflow: hidden;
+        }
+        .light-mode #captcha-btn {
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+        }
+        #captcha-btn.enabled {
+            opacity: 1;
+            pointer-events: auto;
+            animation: glow 1.5s infinite alternate ease-in-out;
+        }
+        #captcha-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+        }
+        .light-mode #captcha-btn:hover {
+            background: linear-gradient(135deg, #93c5fd, #60a5fa);
+        }
+        #captcha-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 0.4s ease-out;
+        }
+        #captcha-btn:hover::before {
+            transform: translate(-50%, -50%) scale(1);
+        }
+        #captcha-progress {
+            display: none;
+            margin: 2rem auto;
+            width: 50px;
+            height: 50px;
+            border: 5px solid #e5e7eb;
+            border-top: 5px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s ease-in-out infinite;
+        }
+        .light-mode #captcha-progress {
+            border: 5px solid #d1d5db;
+            border-top: 5px solid #3b82f6;
+        }
+        #captcha-progress.visible {
+            display: block;
+        }
+        #main-content {
+            opacity: 0;
+            transition: opacity 0.6s ease-in-out;
+        }
+        #main-content.visible {
+            opacity: 1;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(25px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        @keyframes glow {
+            0% { box-shadow: 0 0 8px rgba(59, 130, 246, 0.4); }
+            100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.7); }
+        }
+        @keyframes expandContent {
+            from { max-height: 0; opacity: 0; }
+            to { max-height: 700px; opacity: 1; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(60px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes checkBounce {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        header, .bg-gray-800 {
+            background: linear-gradient(135deg, #1e293b, #111827);
+            border-radius: 16px;
+            transition: all 0.4s ease-in-out;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        .light-mode header, .light-mode .bg-gray-800 {
+            background: linear-gradient(135deg, #ffffff, #f1f5f9);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        input[readonly] {
+            cursor: default;
+            background: #2d3748;
+            transition: all 0.4s ease-in-out;
+            border-radius: 12px;
+            font-weight: 400;
+        }
+        .light-mode input[readonly] {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+        .mode-toggle {
+            cursor: pointer;
+            transition: all 0.4s ease-in-out;
+        }
+        .mode-toggle:hover {
+            transform: scale(1.3) rotate(20deg);
+        }
+        footer {
+            transition: all 0.4s ease-in-out;
+            background: linear-gradient(135deg, #1e293b, #111827);
+            border-radius: 16px 16px 0 0;
+        }
+        .light-mode footer {
+            background: linear-gradient(135deg, #ffffff, #f1f5f9);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center">
+    <!-- Captcha Overlay -->
+    <div id="captcha-overlay">
+        <div id="captcha-container">
+            <h2 id="captcha-title">Xác thực bạn là con người</h2>
+            <div id="captcha-checkbox" onclick="this.classList.add('checked'); document.getElementById('captcha-btn').classList.add('enabled');">
+                <i id="captcha-icon" class="fas fa-check"></i>
+            </div>
+            <button id="captcha-btn" onclick="verifyCaptcha()">Xác thực</button>
+            <div id="captcha-progress"></div>
+        </div>
+    </div>
 
+    <!-- Main Content -->
+    <div id="main-content" class="w-full flex flex-col items-center flex-grow">
+        <!-- Header -->
+        <header class="w-full bg-gray-900 bg-opacity-95 backdrop-blur-md py-5 shadow-xl light-mode:bg-white light-mode:bg-opacity-95">
+            <div class="max-w-7xl mx-auto flex items-center justify-between px-6 md:px-8">
+                <h1 class="text-3xl font-bold text-white tracking-tight light-mode:text-gray-900">📧 Temp Mail Pro</h1>
+                <div class="flex items-center space-x-6">
+                    <div id="timer" class="text-amber-300 font-medium text-lg light-mode:text-amber-600">⏳ Còn lại: 10:00</div>
+                    <i id="modeToggle" class="fas fa-moon text-white text-2xl mode-toggle light-mode:fa-sun light-mode:text-amber-500"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl w-full mx-auto mt-10 px-6 md:px-8 flex-grow">
+            <!-- Email Card -->
+            <div class="bg-gray-800 rounded-2xl shadow-xl p-8 mb-10 light-mode:bg-white">
+                <div class="flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0">
+                    <input id="emailDisplay" type="text" value="Đang tạo email..." readonly
+                           class="w-full bg-gray-700 text-white p-4 rounded-xl text-base font-mono focus:outline-none border border-gray-600 light-mode:bg-gray-100 light-mode:text-gray-900 light-mode:border-gray-200" />
+                    <button id="copyBtn" class="copy-btn btn ml-0 md:ml-4" title="Copy Email">
+                        📋 Copy
+                    </button>
+                </div>
+                <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mt-8">
+                    <button id="refreshBtn" class="btn bg-blue-500 text-white px-8 py-3 rounded-xl hover:bg-blue-600 flex items-center justify-center w-full md:w-auto">
+                        <span id="refreshSpinner" class="loading-spinner hidden mr-3"></span>🔄 Refresh
+                    </button>
+                    <button id="newEmailBtn" class="btn bg-rose-500 text-white px-8 py-3 rounded-xl hover:bg-rose-600 w-full md:w-auto">
+                        ✨ New Email
+                    </button>
+                </div>
+            </div>
+
+            <!-- Inbox -->
+            <div class="bg-gray-800 rounded-2xl shadow-xl p-8 light-mode:bg-white">
+                <h2 class="text-2xl font-semibold mb-6 text-white light-mode:text-gray-900">📬 Inbox</h2>
+                <div id="inboxArea" class="space-y-5 max-h-[70vh] overflow-y-auto">
+                    <div id="loading" class="text-center text-gray-400">Đang tải...</div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="w-full py-5 text-center text-gray-400 text-sm light-mode:text-gray-600 mt-10">
+            © 2025 Temp Mail Pro. All rights reserved.
+        </footer>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed top-6 bg-gray-900 text-white px-6 py-3.5 rounded-xl shadow-xl toast-hidden light-mode:bg-white light-mode:text-gray-900">
+            Notification
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            try {
+                // Captcha Logic
+                const captchaOverlay = document.getElementById('captcha-overlay');
+                const mainContent = document.getElementById('main-content');
+                const captchaBtn = document.getElementById('captcha-btn');
+                const captchaProgress = document.getElementById('captcha-progress');
+
+                function verifyCaptcha() {
+                    try {
+                        if (captchaBtn.classList.contains('enabled')) {
+                            captchaBtn.style.display = 'none';
+                            captchaProgress.classList.add('visible');
+                            setTimeout(() => {
+                                captchaOverlay.classList.add('hidden');
+                                mainContent.classList.add('visible');
+                                captchaBtn.style.display = 'block';
+                                captchaProgress.classList.remove('visible');
+                            }, 1000);
+                        }
+                    } catch (e) {
+                        console.error('Error in verifyCaptcha:', e);
+                        showToast('❌ Lỗi khi xác thực captcha!');
+                    }
+                }
+
+                // Theme toggle
+                const body = document.body;
+                const modeToggle = document.getElementById('modeToggle');
+                modeToggle.addEventListener('click', () => {
+                    try {
+                        body.classList.toggle('light-mode');
+                        modeToggle.classList.toggle('fa-moon');
+                        modeToggle.classList.toggle('fa-sun');
+                        modeToggle.classList.toggle('text-white');
+                        modeToggle.classList.toggle('text-amber-500');
+                    } catch (e) {
+                        console.error('Error in theme toggle:', e);
+                        showToast('❌ Lỗi khi chuyển đổi giao diện!');
+                    }
+                });
+
+                const MAILTM_BASE = "https://api.mail.tm";
+                const SECMAIL_BASE = "https://www.1secmail.com/api/v1/";
+                const GUERRILLA_BASE = "https://api.guerrillamail.com/ajax.php";
+
+                function genPassword(length = 12) {
+                    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                    return Array(length).fill().map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
+                }
+
+                function genUsername(length = 8) {
+                    const chars = 'abcdefghijklmnopqrstuvwxyz';
+                    return Array(length).fill().map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
+                }
+
+                function sanitizeHTML(html) {
+                    try {
+                        if (!html || typeof html !== 'string') return 'No content available';
+                        const dangerousAttrs = /on\w+="[^"]*"/gi;
+                        const scripts = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
+                        const iframes = /<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi;
+                        const styles = /<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi;
+                        const links = /<link\b[^<]*(?:(?!<\/link>)<[^<]*)*<\/link>/gi;
+                        let clean = html.replace(scripts, '')
+                                        .replace(iframes, '')
+                                        .replace(styles, '')
+                                        .replace(links, '')
+                                        .replace(dangerousAttrs, '')
+                                        .replace(/javascript:/gi, '');
+                        if (typeof DOMParser !== 'undefined') {
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(clean, 'text/html');
+                            return doc.body.innerHTML || 'No content available';
+                        }
+                        return clean;
+                    } catch (e) {
+                        console.error('Error in sanitizeHTML:', e);
+                        return 'No content available';
+                    }
+                }
+
+                function showToast(message) {
+                    try {
+                        const toast = document.getElementById('toast');
+                        if (toast) {
+                            toast.textContent = message;
+                            toast.classList.remove('toast-hidden');
+                            setTimeout(() => toast.classList.add('toast-hidden'), 3000);
+                        }
+                    } catch (e) {
+                        console.error('Error in showToast:', e);
+                    }
+                }
+
+                class TempMailApp {
+                    constructor() {
+                        try {
+                            this.email = '';
+                            this.provider = '';
+                            this.token = null;
+                            this.username = null;
+                            this.domain = null;
+                            this.sid_token = null;
+                            this.expireTime = 0;
+                            this.oldMailIds = new Set();
+                            this.emailDisplay = document.getElementById('emailDisplay');
+                            this.toast = document.getElementById('toast');
+                            this.inboxArea = document.getElementById('inboxArea');
+                            this.timerLabel = document.getElementById('timer');
+                            this.refreshSpinner = document.getElementById('refreshSpinner');
+
+                            if (!this.emailDisplay || !this.inboxArea || !this.timerLabel || !this.refreshSpinner) {
+                                throw new Error('Missing required DOM elements');
+                            }
+
+                            document.getElementById('copyBtn').addEventListener('click', () => this.copyEmail());
+                            document.getElementById('refreshBtn').addEventListener('click', () => {
+                                if (confirm('Xác nhận làm mới hòm thư?')) this.refreshInbox();
+                            });
+                            document.getElementById('newEmailBtn').addEventListener('click', () => {
+                                if (confirm('Xác nhận tạo email mới? Email hiện tại sẽ bị xóa.')) this.newEmail();
+                            });
+
+                            this.newEmail();
+                        } catch (e) {
+                            console.error('Error initializing TempMailApp:', e);
+                            showToast('❌ Lỗi khởi tạo ứng dụng!');
+                        }
+                    }
+
+                    showToast(message) {
+                        showToast(message);
+                    }
+
+                    async newEmail() {
+                        try {
+                            this.inboxArea.innerHTML = '<div id="loading" class="text-center text-gray-400">Đang tải...</div>';
+                            this.refreshSpinner.classList.remove('hidden');
+                            let acc = await this.createMailtm();
+                            if (acc) {
+                                this.provider = 'mailtm';
+                                this.email = acc.address;
+                                this.token = acc.token;
+                                this.username = null;
+                                this.domain = null;
+                                this.sid_token = null;
+                            } else {
+                                acc = await this.create1sec();
+                                if (acc) {
+                                    this.provider = '1sec';
+                                    this.email = acc.address;
+                                    this.username = acc.username;
+                                    this.domain = acc.domain;
+                                    this.token = null;
+                                    this.sid_token = null;
+                                } else {
+                                    acc = await this.createGuerrilla();
+                                    if (acc) {
+                                        this.provider = 'guerrilla';
+                                        this.email = acc.address;
+                                        this.sid_token = acc.sid_token;
+                                        this.username = null;
+                                        this.domain = null;
+                                        this.token = null;
+                                    } else {
+                                        this.showToast('❌ Không tạo được email từ bất kỳ API nào!');
+                                        this.inboxArea.innerHTML = '<div class="text-center text-gray-400">Không thể tạo email.</div>';
+                                        this.refreshSpinner.classList.add('hidden');
+                                        return;
+                                    }
+                                }
+                            }
+
+                            this.expireTime = Date.now() + 600000;
+                            this.emailDisplay.value = this.email;
+                            this.inboxArea.innerHTML = '<div class="text-center text-gray-400">📭 Chưa có thư...</div>';
+                            this.oldMailIds.clear();
+                            this.updateTimer();
+                            this.autoRefresh();
+                            this.showToast(`✅ Email mới: ${this.email}`);
+                            this.refreshSpinner.classList.add('hidden');
+                        } catch (e) {
+                            console.error('Error in newEmail:', e);
+                            this.showToast('❌ Lỗi khi tạo email mới!');
+                            this.inboxArea.innerHTML = '<div class="text-center text-gray-400">Lỗi tải email, thử lại sau.</div>';
+                            this.refreshSpinner.classList.add('hidden');
+                        }
+                    }
+
+                    async createMailtm() {
+                        try {
+                            const domainsRes = await fetch(`${MAILTM_BASE}/domains`);
+                            if (!domainsRes.ok) {
+                                console.warn('Mail.tm domains fetch failed:', domainsRes.status);
+                                return null;
+                            }
+                            const domains = (await domainsRes.json())['hydra:member'];
+                            if (!domains || !domains.length) return null;
+                            const domain = domains[0].domain;
+                            const username = genUsername();
+                            const address = `${username}@${domain}`;
+                            const password = genPassword();
+
+                            const data = { address, password };
+                            const createRes = await fetch(`${MAILTM_BASE}/accounts`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(data)
+                            });
+                            if (!createRes.ok) {
+                                console.warn('Mail.tm account creation failed:', createRes.status);
+                                return null;
+                            }
+
+                            const tokenRes = await fetch(`${MAILTM_BASE}/token`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(data)
+                            });
+                            if (!tokenRes.ok) {
+                                console.warn('Mail.tm token fetch failed:', tokenRes.status);
+                                return null;
+                            }
+                            const tokenData = await tokenRes.json();
+                            if (!tokenData.token) return null;
+                            return { provider: 'mailtm', address, password, token: tokenData.token };
+                        } catch (e) {
+                            console.error('Error creating Mail.tm account:', e);
+                            return null;
+                        }
+                    }
+
+                    async create1sec() {
+                        try {
+                            const res = await fetch(`${SECMAIL_BASE}?action=genRandomMailbox&count=1`);
+                            if (!res.ok) {
+                                console.warn('1secmail fetch failed:', res.status);
+                                return null;
+                            }
+                            const addresses = await res.json();
+                            if (!addresses || !addresses.length) return null;
+                            const address = addresses[0];
+                            const [username, domain] = address.split('@');
+                            return { provider: '1sec', address, username, domain };
+                        } catch (e) {
+                            console.error('Error creating 1secmail account:', e);
+                            return null;
+                        }
+                    }
+
+                    async createGuerrilla() {
+                        try {
+                            const res = await fetch(`${GUERRILLA_BASE}?f=get_email_address`);
+                            if (!res.ok) {
+                                console.warn('GuerrillaMail fetch failed:', res.status);
+                                return null;
+                            }
+                            const data = await res.json();
+                            if (!data.email_addr || !data.sid_token) return null;
+                            return { provider: 'guerrilla', address: data.email_addr, sid_token: data.sid_token };
+                        } catch (e) {
+                            console.error('Error creating GuerrillaMail account:', e);
+                            return null;
+                        }
+                    }
+
+                    async deleteMailtm(msgId) {
+                        try {
+                            const res = await fetch(`${MAILTM_BASE}/messages/${msgId}`, {
+                                method: 'DELETE',
+                                headers: { 'Authorization': `Bearer ${this.token}` }
+                            });
+                            if (!res.ok) throw new Error('Delete failed');
+                            this.showToast('🗑️ Đã xóa email!');
+                            this.refreshInbox();
+                        } catch (e) {
+                            console.error('Error deleting Mail.tm message:', e);
+                            this.showToast('❌ Không thể xóa email!');
+                        }
+                    }
+
+                    async getMailtmInbox() {
+                        try {
+                            const res = await fetch(`${MAILTM_BASE}/messages`, {
+                                headers: { 'Authorization': `Bearer ${this.token}` }
+                            });
+                            if (!res.ok) {
+                                console.warn('Mail.tm inbox fetch failed:', res.status);
+                                return [];
+                            }
+                            return (await res.json())['hydra:member'] || [];
+                        } catch (e) {
+                            console.error('Error fetching Mail.tm inbox:', e);
+                            return [];
+                        }
+                    }
+
+                    async readMailtm(msgId) {
+                        try {
+                            const res = await fetch(`${MAILTM_BASE}/messages/${msgId}`, {
+                                headers: { 'Authorization': `Bearer ${this.token}` }
+                            });
+                            if (!res.ok) {
+                                console.warn('Mail.tm message read failed:', res.status);
+                                return {};
+                            }
+                            return await res.json();
+                        } catch (e) {
+                            console.error('Error reading Mail.tm message:', e);
+                            return {};
+                        }
+                    }
+
+                    async get1secInbox() {
+                        try {
+                            const res = await fetch(`${SECMAIL_BASE}?action=getMessages&login=${this.username}&domain=${this.domain}`);
+                            if (!res.ok) {
+                                console.warn('1secmail inbox fetch failed:', res.status);
+                                return [];
+                            }
+                            return await res.json();
+                        } catch (e) {
+                            console.error('Error fetching 1secmail inbox:', e);
+                            return [];
+                        }
+                    }
+
+                    async read1sec(msgId) {
+                        try {
+                            const res = await fetch(`${SECMAIL_BASE}?action=readMessage&login=${this.username}&domain=${this.domain}&id=${msgId}`);
+                            if (!res.ok) {
+                                console.warn('1secmail message read failed:', res.status);
+                                return {};
+                            }
+                            return await res.json();
+                        } catch (e) {
+                            console.error('Error reading 1secmail message:', e);
+                            return {};
+                        }
+                    }
+
+                    async getGuerrillaInbox() {
+                        try {
+                            const res = await fetch(`${GUERRILLA_BASE}?f=get_email_list&offset=0&sid_token=${this.sid_token}`);
+                            if (!res.ok) {
+                                console.warn('GuerrillaMail inbox fetch failed:', res.status);
+                                return [];
+                            }
+                            return (await res.json()).list || [];
+                        } catch (e) {
+                            console.error('Error fetching GuerrillaMail inbox:', e);
+                            return [];
+                        }
+                    }
+
+                    async readGuerrilla(mailId) {
+                        try {
+                            const res = await fetch(`${GUERRILLA_BASE}?f=fetch_email&sid_token=${this.sid_token}&email_id=${mailId}`);
+                            if (!res.ok) {
+                                console.warn('GuerrillaMail message read failed:', res.status);
+                                return {};
+                            }
+                            return await res.json();
+                        } catch (e) {
+                            console.error('Error reading GuerrillaMail message:', e);
+                            return {};
+                        }
+                    }
+
+                    copyEmail() {
+                        try {
+                            if (!navigator.clipboard) {
+                                throw new Error('Clipboard API not supported');
+                            }
+                            navigator.clipboard.writeText(this.email).then(() => {
+                                this.showToast(`📋 Đã copy email: ${this.email}`);
+                            }).catch((e) => {
+                                console.error('Error copying email:', e);
+                                this.showToast('❌ Không thể copy email!');
+                            });
+                        } catch (e) {
+                            console.error('Error in copyEmail:', e);
+                            this.showToast('❌ Không thể copy email!');
+                        }
+                    }
+
+                    async refreshInbox() {
+                        try {
+                            if (Date.now() > this.expireTime) {
+                                this.inboxArea.innerHTML = '<div class="text-center text-gray-400">⛔ Email đã hết hạn (10 phút).</div>';
+                                return;
+                            }
+
+                            this.refreshSpinner.classList.remove('hidden');
+                            this.inboxArea.innerHTML = '<div id="loading" class="text-center text-gray-400">Đang tải...</div>';
+                            let mails = [];
+                            if (this.provider === 'mailtm') {
+                                const inbox = await this.getMailtmInbox();
+                                mails = await Promise.all(inbox.map(async m => [
+                                    m.id,
+                                    m.from?.address || 'Unknown',
+                                    m.subject || 'No subject',
+                                    await this.readMailtm(m.id),
+                                    m.createdAt
+                                ]));
+                            } else if (this.provider === '1sec') {
+                                const inbox = await this.get1secInbox();
+                                mails = await Promise.all(inbox.map(async m => [
+                                    m.id,
+                                    m.from || 'Unknown',
+                                    m.subject || 'No subject',
+                                    await this.read1sec(m.id),
+                                    m.date
+                                ]));
+                            } else if (this.provider === 'guerrilla') {
+                                const inbox = await this.getGuerrillaInbox();
+                                mails = await Promise.all(inbox.map(async m => [
+                                    m.mail_id,
+                                    m.mail_from || 'Unknown',
+                                    m.mail_subject || 'No subject',
+                                    await this.readGuerrilla(m.mail_id),
+                                    m.mail_date
+                                ]));
+                            }
+
+                            this.inboxArea.innerHTML = '';
+                            let newMailFound = false;
+
+                            for (const [mid, sender, subject, msg, date] of mails) {
+                                let htmlContent = msg.htmlBody || msg.html || msg.mail_body || '';
+                                if (Array.isArray(htmlContent)) {
+                                    htmlContent = htmlContent.join('');
+                                }
+                                let bodyHTML = htmlContent;
+                                if (!bodyHTML) {
+                                    const textContent = msg.text || msg.body || msg.textBody || msg.mail_excerpt || 'No content available';
+                                    bodyHTML = textContent.replace(/\n/g, '<br>');
+                                }
+                                const sanitizedHTML = sanitizeHTML(bodyHTML);
+                                const emailDiv = document.createElement('div');
+                                emailDiv.className = 'email-row bg-gray-700 rounded-xl p-5 light-mode:bg-gray-100';
+                                emailDiv.innerHTML = `
+                                    <div class="flex justify-between items-center cursor-pointer" onclick="this.nextElementSibling.classList.toggle('show');">
+                                        <div>
+                                            <p class="font-medium text-white light-mode:text-gray-900">👤 ${sender}</p>
+                                            <p class="text-gray-300 light-mode:text-gray-600 text-sm mt-1">📌 ${subject}</p>
+                                            <p class="text-gray-400 text-xs light-mode:text-gray-500 mt-1">🕒 ${new Date(date).toLocaleString()}</p>
+                                        </div>
+                                        <span class="text-gray-400 light-mode:text-gray-500 text-lg">▼</span>
+                                    </div>
+                                    <div class="email-content mt-4">
+                                        <iframe sandbox="allow-same-origin allow-scripts" srcdoc="${sanitizedHTML.replace(/"/g, '&quot;')}"></iframe>
+                                        ${this.provider === 'mailtm' ? `<button class="btn bg-rose-500 text-white px-5 py-2.5 mt-4 rounded-xl hover:bg-rose-600" onclick="app.deleteMailtm('${mid}')">🗑️ Delete</button>` : ''}
+                                    </div>
+                                `;
+                                this.inboxArea.appendChild(emailDiv);
+
+                                if (!this.oldMailIds.has(mid.toString())) {
+                                    newMailFound = true;
+                                }
+                            }
+
+                            const currentIds = new Set(mails.map(m => m[0].toString()));
+                            if (newMailFound) {
+                                this.showToast('🔔 Bạn có thư mới!');
+                            }
+                            this.oldMailIds = currentIds;
+
+                            if (!mails.length) {
+                                this.inboxArea.innerHTML = '<div class="text-center text-gray-400">📭 Chưa có thư...</div>';
+                            }
+                        } catch (e) {
+                            console.error('Error during inbox refresh:', e);
+                            this.showToast('❌ Lỗi khi làm mới hòm thư!');
+                            this.inboxArea.innerHTML = '<div class="text-center text-gray-400">❌ Lỗi tải thư, thử lại sau.</div>';
+                        } finally {
+                            this.refreshSpinner.classList.add('hidden');
+                        }
+                    }
+
+                    autoRefresh() {
+                        try {
+                            this.refreshInbox();
+                            setInterval(() => this.refreshInbox(), 10000);
+                        } catch (e) {
+                            console.error('Error in autoRefresh:', e);
+                            this.showToast('❌ Lỗi khi tự động làm mới!');
+                        }
+                    }
+
+                    updateTimer() {
+                        try {
+                            const remaining = Math.max(0, Math.floor((this.expireTime - Date.now()) / 1000));
+                            if (remaining > 0) {
+                                const mins = Math.floor(remaining / 60);
+                                const secs = remaining % 60;
+                                this.timerLabel.textContent = `⏳ Còn lại: ${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                                setTimeout(() => this.updateTimer(), 1000);
+                            } else {
+                                this.timerLabel.textContent = '⛔ Email đã hết hạn!';
+                                this.emailDisplay.value = 'HẾT HẠN';
+                                this.inboxArea.innerHTML = '<div class="text-center text-gray-400">⛔ Email hết hạn, bấm "✨ New Email" để tạo lại.</div>';
+                            }
+                        } catch (e) {
+                            console.error('Error in updateTimer:', e);
+                            this.showToast('❌ Lỗi khi cập nhật bộ đếm thời gian!');
+                        }
+                    }
+                }
+
+                // Initialize the app
+                try {
+                    const app = new TempMailApp();
+                    console.log('TempMailApp initialized successfully');
+                } catch (e) {
+                    console.error('Failed to initialize TempMailApp:', e);
+                    showToast('❌ Lỗi khởi tạo ứng dụng!');
+                }
+            } catch (e) {
+                console.error('Global error:', e);
+                showToast('❌ Lỗi hệ thống, vui lòng thử lại!');
+            }
+        })();
+    </script>
+</body>
+</html>
